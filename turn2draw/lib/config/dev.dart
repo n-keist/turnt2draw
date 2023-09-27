@@ -1,0 +1,1 @@
+const devSessionId = 'debug-session';

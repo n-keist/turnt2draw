@@ -1,0 +1,8 @@
+import 'package:logger/logger.dart';
+
+final logger = Logger(
+  printer: SimplePrinter(
+    printTime: true,
+    colors: false,
+  ),
+);
