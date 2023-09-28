@@ -30,8 +30,6 @@ PaintDrawable mapJsonToDrawable(Map<String, dynamic> value) {
       offsets: ((value['path'] ?? '').split(';') as List<dynamic>).map(
         (path) {
           final pathJson = jsonDecode(path) as List<dynamic>;
-          logger.d(pathJson.runtimeType);
-          logger.d(pathJson);
           return Offset(
             switch (pathJson[0].runtimeType) {
               int => pathJson[0].toDouble(),

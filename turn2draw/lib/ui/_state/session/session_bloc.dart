@@ -9,6 +9,7 @@ import 'package:turn2draw/data/service/impl/local_player_service.dart';
 import 'package:turn2draw/data/service/impl/remote_session_service.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
+import 'package:turn2draw/ui/_state/session/effects/player_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';
@@ -32,9 +33,18 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   final PlayerService playerService;
 
   void _onInitSessionEvent(InitSessionEvent event, Emitter<SessionState> emit) async {
+    final playerId = await playerService.getCurrentPlayerId(), playerName = await playerService.getCurrentPlayerName();
+    if (playerId == null || playerName == null) {
+      emit(
+        state.copyWith(
+          effect: () => NoPlayerInfoEffect(),
+        ),
+      );
+      return;
+    }
     final self = Player(
-      playerId: (await playerService.getCurrentPlayerId())!,
-      playerDisplayname: (await playerService.getCurrentPlayerName())!,
+      playerId: playerId,
+      playerDisplayname: playerName,
     );
     emit(
       state.copyWith(
@@ -82,12 +92,10 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     if (event.event == onSessionNextTurn) {
       if (event.payload == null) throw 'unexpected null payload on ${event.event}';
       final turnInfo = TurnInfo.json(event.payload!);
-      final self = await playerService.getCurrentPlayerId();
-      if (self == null) return;
       emit(
         state.copyWith(
           turnInfo: () => turnInfo,
-          effect: () => turnInfo.turnPlayer == self ? MyTurnEffect() : NotMyTurnEffect(),
+          effect: () => turnInfo.turnPlayer == state.self.playerId ? MyTurnEffect() : NotMyTurnEffect(),
         ),
       );
       return;
@@ -141,7 +149,6 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
 
   Future<SessionState> _startSession(String sessionId) async {
     final result = await sessionService.beginSession(sessionId);
-    logger.d(result);
     if (result == null) return state.copyWith();
     return switch (result) {
       'NOT_ENOUGH_PLAYERS' => state.copyWith(

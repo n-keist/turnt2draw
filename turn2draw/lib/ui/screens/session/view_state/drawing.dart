@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:turn2draw/data/extension/double_extension.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';
@@ -109,10 +108,10 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
             return child!;
           },
           child: Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               left: 12.5,
               right: 12.5,
-              bottom: MediaQuery.of(context).viewPadding.bottom.ifLessThanOrEqualTo(constraint: 6, orElse: 16),
+              bottom: 16,
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(

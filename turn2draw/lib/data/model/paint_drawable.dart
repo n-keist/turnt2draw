@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:turn2draw/data/extension/fn_extension.dart';
 
-class PaintDrawable {
-  PaintDrawable({
+class PaintDrawable extends Equatable {
+  const PaintDrawable({
     this.id = '',
     this.offsets = const [],
     this.color = Colors.blue,
@@ -26,4 +27,7 @@ class PaintDrawable {
   final List<Offset> offsets;
   final Color color;
   final double strokeWidth;
+
+  @override
+  List<Object?> get props => [id, offsets, color, strokeWidth];
 }

@@ -54,18 +54,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     await playerService.createPlayerIfNotExists(generatedName);
   }
 
-  void _onChangeCountOnSubjectEvent(
-      ChangeCountOnSubjectEvent event, Emitter<HomeState> emit) async {
+  void _onChangeCountOnSubjectEvent(ChangeCountOnSubjectEvent event, Emitter<HomeState> emit) async {
     switch (event.subject) {
       case CountSubject.playerCount:
         emit(
           state.copyWith(
             maxPlayers: () => switch (event.type) {
-              CountEventType.add => state.maxPlayers >= 99
-                  ? state.maxPlayers
-                  : state.maxPlayers + 1,
-              CountEventType.remove =>
-                state.maxPlayers <= 2 ? state.maxPlayers : state.maxPlayers - 1,
+              CountEventType.add => state.maxPlayers >= 99 ? state.maxPlayers : state.maxPlayers + 1,
+              CountEventType.remove => state.maxPlayers <= 2 ? state.maxPlayers : state.maxPlayers - 1,
             },
           ),
         );
@@ -74,11 +70,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(
           state.copyWith(
             roundCount: () => switch (event.type) {
-              CountEventType.add => state.roundCount >= 99
-                  ? state.roundCount
-                  : state.roundCount + 1,
-              CountEventType.remove =>
-                state.roundCount <= 2 ? state.roundCount : state.roundCount - 1,
+              CountEventType.add => state.roundCount >= 99 ? state.roundCount : state.roundCount + 1,
+              CountEventType.remove => state.roundCount <= 2 ? state.roundCount : state.roundCount - 1,
             },
           ),
         );
@@ -87,18 +80,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(
           state.copyWith(
             turnDuration: () => switch (event.type) {
-              CountEventType.add => state.turnDuration >= 120
-                  ? state.turnDuration
-                  : state.turnDuration + 5,
-              CountEventType.remove => state.turnDuration <= 5
-                  ? state.turnDuration
-                  : state.turnDuration - 5,
+              CountEventType.add => state.turnDuration >= 120 ? state.turnDuration : state.turnDuration + 5,
+              CountEventType.remove => state.turnDuration <= 5 ? state.turnDuration : state.turnDuration - 5,
             },
           ),
         );
         break;
       default:
-        throw UnimplementedError('subject type not implemented');
+        throw 'subject type not implemented';
     }
   }
 
@@ -106,8 +95,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(word: () => null));
   }
 
-  void _onPickNewWordEvent(
-      PickNewWordEvent event, Emitter<HomeState> emit) async {
+  void _onPickNewWordEvent(PickNewWordEvent event, Emitter<HomeState> emit) async {
     final topics = await wordRepository.getWords();
     final topic = switch (topics.length) {
       > 1 => topics.elementAt(random.nextInt(topics.length - 1)),
@@ -116,8 +104,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(word: () => topic));
   }
 
-  void _onCreateSessionEvent(
-      CreateSessionEvent event, Emitter<HomeState> emit) async {
+  void _onCreateSessionEvent(CreateSessionEvent event, Emitter<HomeState> emit) async {
     final playerId = await playerService.getCurrentPlayerId();
     if (playerId == null) return;
     final config = CreateSessionConfig(
@@ -133,24 +120,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (session == null) return;
     emit(
       state.copyWith(
-        effect: () =>
-            SessionEffect(type: SessionEffectType.created, sessionId: session),
+        effect: () => SessionEffect(type: SessionEffectType.created, sessionId: session),
       ),
     );
   }
 
-  void _onJoinSessionEvent(
-      JoinSessionEvent event, Emitter<HomeState> emit) async {
+  void _onJoinSessionEvent(JoinSessionEvent event, Emitter<HomeState> emit) async {
     final playerId = await playerService.getCurrentPlayerId();
     final playerName = await playerService.getCurrentPlayerName();
-    final result = await sessionService.joinSession(
-        event.sessionId, playerId!, playerName!, null);
+    final result = await sessionService.joinSession(event.sessionId, playerId!, playerName!, null);
     logger.d('JOIN: $result');
     if (result) {
       emit(
         state.copyWith(
-          effect: () => SessionEffect(
-              type: SessionEffectType.joined, sessionId: event.sessionId),
+          effect: () => SessionEffect(type: SessionEffectType.joined, sessionId: event.sessionId),
         ),
       );
     }

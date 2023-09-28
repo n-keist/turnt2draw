@@ -4,7 +4,6 @@ import 'package:turn2draw/app.dart';
 import 'package:turn2draw/data/repository/word_repository.dart';
 import 'package:turn2draw/locator.dart';
 import 'package:turn2draw/storage/local_storage.dart';
-import 'package:uno/uno.dart';
 
 void main() {
   setupLocator().then((_) {
@@ -14,7 +13,6 @@ void main() {
           RepositoryProvider<WordRepository>(
             create: (context) => WordRepository(
               storage: locator<LocalStorage>(),
-              uno: locator<Uno>(),
             ),
           ),
         ],

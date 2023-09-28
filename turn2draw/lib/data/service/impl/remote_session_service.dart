@@ -1,22 +1,26 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:turn2draw/config/http.dart';
 import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/create_session_config.dart';
 import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/data/service/session_service.dart';
-import 'package:uno/uno.dart';
+
+import 'package:http/http.dart' as http;
 
 class RemoteSessionService extends SessionService {
-  RemoteSessionService({Uno? uno}) : uno = uno ?? Uno();
-
-  final Uno uno;
+  RemoteSessionService();
 
   @override
   Future<SessionInfo?> findSession(String sessionId) async {
     try {
-      final response = await uno.get('/api/session/$sessionId');
-      return SessionInfo.parseJson(response.data);
+      final response = await http.get(
+        Uri.parse(httpBaseUrl).replace(
+          path: '/api/session/$sessionId',
+        ),
+      );
+      return SessionInfo.parseJson(jsonDecode(response.body));
     } catch (e) {
       log('could not find session: $sessionId', error: e);
       return null;
@@ -27,19 +31,20 @@ class RemoteSessionService extends SessionService {
   Future<bool> joinSession(
       String sessionId, String playerId, String playerDisplayname, String? playerNotificationHandle) async {
     try {
-      final response = await uno.put(
-        '/api/session/$sessionId/join',
-        responseType: ResponseType.plain,
+      final response = await http.put(
+        Uri.parse(httpBaseUrl).replace(
+          path: '/api/session/$sessionId/join',
+        ),
         headers: {
           'Content-Type': 'application/json',
         },
-        data: {
+        body: {
           'playerId': playerId,
           'playerDisplayname': playerDisplayname,
           if (playerNotificationHandle != null) 'playerNotificationHandle': playerNotificationHandle,
         },
       );
-      return response.status == 200;
+      return response.statusCode == 200;
     } catch (e) {
       log('could not join session: $sessionId', error: e);
       logger.e('could not join session $sessionId', error: e);
@@ -50,9 +55,15 @@ class RemoteSessionService extends SessionService {
   @override
   Future<String?> startSession(CreateSessionConfig config) async {
     try {
-      final response = await uno.post('/api/session', data: config.toJson());
-      if (response.status == 201) {
-        return response.data['id'] as String;
+      final response = await http.post(
+        Uri.parse(httpBaseUrl).replace(
+          path: '/api/session',
+        ),
+        body: config.toJson(),
+      );
+      if (response.statusCode == 201) {
+        final json = jsonDecode(response.body);
+        return json['id'] as String;
       }
     } catch (e) {
       log('could not create session', error: e);
@@ -63,13 +74,13 @@ class RemoteSessionService extends SessionService {
   @override
   Future<String?> beginSession(String sessionId) async {
     try {
-      final response = await uno.get(
-        '/api/session/$sessionId/begin',
-        validateStatus: (_) => true,
-        responseType: ResponseType.plain,
+      final response = await http.get(
+        Uri.parse(httpBaseUrl).replace(
+          path: '/api/session/$sessionId/begin',
+        ),
       );
-      if (response.status == 200) return null;
-      final json = jsonDecode(response.data);
+      if (response.statusCode == 200) return null;
+      final json = jsonDecode(response.body);
       return json['err_code'];
     } catch (e) {
       logger.e('could not begin session', error: e);

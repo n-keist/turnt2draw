@@ -115,7 +115,6 @@ class SessionWaitingView extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () => context.read<SessionBloc>().add(
                                 LocalSessionEvent(
-                                  socket: socket,
                                   type: LocalSessionEventType.begin,
                                 ),
                               ),

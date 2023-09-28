@@ -43,9 +43,7 @@ class _SessionScreenState extends State<SessionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final id = GoRouterState.of(context).pathParameters['id'];
       if (id != null && id.isNotEmpty) {
-        context
-            .read<SessionBloc>()
-            .add(LocalSessionEvent(socket: socket, type: LocalSessionEventType.find, sessionId: id));
+        context.read<SessionBloc>().add(LocalSessionEvent(type: LocalSessionEventType.find, sessionId: id));
       }
     });
 
