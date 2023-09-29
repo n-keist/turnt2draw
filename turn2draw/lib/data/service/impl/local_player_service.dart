@@ -10,13 +10,16 @@ class LocalPlayerService extends PlayerService {
   final LocalStorage localStorage;
 
   @override
-  Future<String> createPlayerIfNotExists(String playerName) async {
+  Future<(String, String)> createPlayerIfNotExists(String playerName) async {
     String? playerId = await getCurrentPlayerId();
-    if (playerId != null) return playerId;
+    String? name = await getCurrentPlayerName();
+    if (playerId != null && name != null) {
+      return (playerId, playerName);
+    }
     playerId = nanoid(length: 24);
     await localStorage.write<String>(pGeneratedUserId, playerId);
     await localStorage.write<String>(pGeneratedUsername, playerName);
-    return playerId;
+    return (playerId, playerName);
   }
 
   @override

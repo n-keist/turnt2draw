@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:turn2draw/ui/common/input/square_button.dart';
 
 class PlusMinusButtonBar extends StatelessWidget {
-  const PlusMinusButtonBar({super.key, this.value = 0, this.removeCallback, this.addCallback});
+  const PlusMinusButtonBar(
+      {super.key, this.value = 0, this.removeCallback, this.addCallback, this.color = Colors.deepPurple});
 
   final VoidCallback? removeCallback;
   final VoidCallback? addCallback;
   final int value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +17,10 @@ class PlusMinusButtonBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        FloatingActionButton.small(
-          heroTag: UniqueKey(),
-          onPressed: removeCallback,
-          child: const Icon(Icons.remove_rounded),
+        SquareButton(
+          icon: const Icon(Icons.remove_rounded, color: Colors.white),
+          callback: removeCallback,
+          color: color,
         ),
         Text(
           value.toString(),
@@ -26,10 +29,10 @@ class PlusMinusButtonBar extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        FloatingActionButton.small(
-          heroTag: UniqueKey(),
-          onPressed: addCallback,
-          child: const Icon(Icons.add_rounded),
+        SquareButton(
+          icon: const Icon(Icons.add_rounded, color: Colors.white),
+          callback: addCallback,
+          color: color,
         ),
       ],
     );

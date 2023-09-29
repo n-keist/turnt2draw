@@ -5,7 +5,6 @@ import 'package:turn2draw/data/repository/word_repository.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
 import 'package:turn2draw/locator.dart';
-import 'package:turn2draw/ui/_state/home/home_event.dart';
 import 'package:turn2draw/ui/_state/session/events/init_event.dart';
 import 'package:turn2draw/ui/screens/home/home.dart';
 import 'package:turn2draw/ui/screens/session/session.dart';
@@ -21,7 +20,7 @@ final router = GoRouter(
           wordRepository: context.read<WordRepository>(),
           playerService: locator<PlayerService>(),
           //sessionService: locator<SessionService>(),
-        )..add(HomeInitEvent()),
+        ),
         child: const HomeScreen(),
       ),
     ),

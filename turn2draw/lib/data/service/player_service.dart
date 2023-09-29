@@ -5,7 +5,7 @@ abstract class PlayerService {
   /// checks if player info is stored in local storage
   ///
   /// if no info is present, it will generate a random id & store the name with id
-  Future<String> createPlayerIfNotExists(String playerName);
+  Future<(String, String)> createPlayerIfNotExists(String playerName);
 
   /// returns currently stored player name, null if there is none
   Future<String?> getCurrentPlayerName();

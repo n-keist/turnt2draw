@@ -1,6 +1,7 @@
 library home_events;
 
-part 'events/word_event.dart';
+import 'package:turn2draw/data/model/create_session_config.dart';
+
 part 'events/player_count_event.dart';
 part 'events/create_session_event.dart';
 part 'events/init_event.dart';

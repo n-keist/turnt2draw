@@ -34,6 +34,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
 
   void _onInitSessionEvent(InitSessionEvent event, Emitter<SessionState> emit) async {
     final playerId = await playerService.getCurrentPlayerId(), playerName = await playerService.getCurrentPlayerName();
+
     if (playerId == null || playerName == null) {
       emit(
         state.copyWith(
@@ -42,13 +43,13 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
       );
       return;
     }
-    final self = Player(
-      playerId: playerId,
-      playerDisplayname: playerName,
-    );
+
     emit(
       state.copyWith(
-        self: () => self,
+        self: () => Player(
+          playerId: playerId,
+          playerDisplayname: playerName,
+        ),
       ),
     );
   }

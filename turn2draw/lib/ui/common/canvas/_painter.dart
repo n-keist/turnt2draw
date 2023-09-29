@@ -10,7 +10,7 @@ class CanvasPainter extends CustomPainter {
     for (final drawable in drawables) {
       final paint = Paint()
         ..isAntiAlias = true
-        ..strokeCap = StrokeCap.butt
+        ..strokeCap = StrokeCap.round
         ..color = drawable.color
         ..strokeWidth = drawable.strokeWidth;
 
@@ -24,5 +24,5 @@ class CanvasPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CanvasPainter oldDelegate) => oldDelegate.drawables != drawables;
+  bool shouldRepaint(covariant CanvasPainter oldDelegate) => true;
 }

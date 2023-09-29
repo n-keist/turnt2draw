@@ -10,6 +10,7 @@ class SharedPreferencesLocalStorage extends LocalStorage {
   Future<T> read<T>(String key) async {
     if (T is String || T is String?) return preferences.getString(key) as T;
     if (T is List<String> || T is List<String>?) return preferences.getStringList(key) as T;
+    if (T is bool || T is bool?) return preferences.getBool(key) as T;
     return preferences.get(key) as T;
   }
 
@@ -17,6 +18,7 @@ class SharedPreferencesLocalStorage extends LocalStorage {
   Future<dynamic> write<T>(String key, T value) async {
     if (value is String) return await preferences.setString(key, value);
     if (value is List<String>) return await preferences.setStringList(key, value);
+    if (value is bool) return await preferences.setBool(key, value);
     throw UnimplementedError('storage type "${T.runtimeType.toString()}" is not implemented');
   }
 }

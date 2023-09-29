@@ -1,7 +1,7 @@
 part of '../home_event.dart';
 
 class JoinSessionEvent extends HomeEvent {
-  JoinSessionEvent({this.sessionId = ''});
+  JoinSessionEvent({this.sessionCode = ''});
 
-  final String sessionId;
+  final String? sessionCode;
 }

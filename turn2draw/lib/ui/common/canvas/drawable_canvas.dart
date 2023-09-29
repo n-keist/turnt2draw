@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nanoid2/nanoid2.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
+import 'package:turn2draw/data/service/settings_service.dart';
+import 'package:turn2draw/locator.dart';
 
 part '_painter.dart';
 
@@ -54,6 +57,9 @@ class _DrawableCanvasState extends State<DrawableCanvas> {
       onPanUpdate: (details) {
         if (!widget.enabled) return;
         if (_drawable == null) return;
+
+        if (locator<SettingsService>().settings.hapticFeedback) HapticFeedback.selectionClick();
+
         setState(() {
           _drawable = _drawable?.copyWith(
             offsets: () => List<Offset>.from(_drawable!.offsets)..add(details.localPosition),

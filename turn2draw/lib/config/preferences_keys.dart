@@ -9,3 +9,5 @@ const pTopicListETag = 'topic_list_e_tag';
 
 const pGeneratedUserId = 'generated_user_id';
 const pGeneratedUsername = 'generated_user_name';
+
+const pSettingsHapticFeed = 'haptic_feedback';

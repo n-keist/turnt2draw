@@ -90,7 +90,7 @@ class _SessionScreenState extends State<SessionScreen> {
           title: const Text('hold up'),
           content: const Text('To begin a game, there are at least 2 players required.'),
           actions: [
-            if (Platform.isIOS || Platform.isMacOS)
+            if (Platform.isIOS)
               CupertinoDialogAction(
                 isDefaultAction: true,
                 onPressed: () => Navigator.of(context).pop(),

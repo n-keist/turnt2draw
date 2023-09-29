@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 final lightTheme = ThemeData(
-  fontFamily: 'ComingSoon',
-  applyElevationOverlayColor: true,
+  //fontFamily: 'ComingSoon',
+  //applyElevationOverlayColor: true,
   appBarTheme: AppBarTheme(
     backgroundColor: Colors.transparent,
     elevation: 0.0,
@@ -13,10 +13,17 @@ final lightTheme = ThemeData(
       fontFamily: 'ComingSoon',
       color: Colors.grey.shade800,
       fontWeight: FontWeight.bold,
-      fontSize: 24.0,
-      decoration: TextDecoration.underline,
-      decorationThickness: 1.75,
-      decorationStyle: TextDecorationStyle.wavy,
+      fontSize: 20.0,
+    ),
+  ),
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    elevation: 0.0,
+  ),
+  splashFactory: NoSplash.splashFactory,
+  iconButtonTheme: const IconButtonThemeData(
+    style: ButtonStyle(
+      elevation: MaterialStatePropertyAll(0),
+      overlayColor: MaterialStatePropertyAll(Colors.transparent),
     ),
   ),
 );

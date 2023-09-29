@@ -1,14 +1,21 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:turn2draw/config/dev.dart';
+import 'package:turn2draw/data/model/create_session_config.dart';
+import 'package:turn2draw/data/model/paint_drawable.dart';
+import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/ui/_state/home/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/home/home_event.dart';
-import 'package:turn2draw/ui/common/input/pm_button_bar.dart';
+import 'package:turn2draw/ui/common/brand.dart';
+import 'package:turn2draw/ui/common/canvas/drawable_canvas.dart';
+import 'package:turn2draw/ui/common/input/wide_button.dart';
 import 'package:turn2draw/ui/screens/home/home.dart';
-import 'package:turn2draw/ui/screens/home/modal/scan_session_modal.dart';
+import 'package:turn2draw/ui/screens/home/modal/create_game_modal.dart';
+import 'package:turn2draw/ui/screens/home/modal/settings_modal.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,57 +25,54 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final drawables = <PaintDrawable>[];
+
+  final colors = <Color>[
+    Colors.blue,
+    Colors.purple,
+    Colors.orange,
+    Colors.pink,
+    Colors.green,
+  ];
+
+  late Color currentColor;
+
+  @override
+  void initState() {
+    currentColor = colors[0];
+    context.read<HomeBloc>().add(HomeInitEvent());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset('assets/svg_icons/pencil.svg'),
-            const SizedBox(width: 16.0),
-            const Text('turnt2draw'),
-            const SizedBox(width: 16.0),
-            Transform.flip(
-              flipX: true,
-              child: SvgPicture.asset('assets/svg_icons/pencil.svg'),
+            CircleAvatar(
+              radius: 20,
+              child: SvgPicture.asset('assets/svg_icons/crown.svg'),
+            ),
+            const SizedBox(width: 12.0),
+            BlocSelector<HomeBloc, HomeState, Player>(
+              selector: (state) => state.self,
+              builder: (context, self) {
+                return Text(self.playerDisplayname);
+              },
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (kDebugMode) {
-            return context
-                .read<HomeBloc>()
-                .add(JoinSessionEvent(sessionId: devSessionId));
-          }
-          final result = await showModalBottomSheet(
-            context: context,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            builder: (modalContext) => const ScanSessionModal(),
-          );
-          if (result == null) return;
-          if (result is StateError) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context)
-              ..clearSnackBars()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(result.message),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            return;
-          }
-          if (result is String) {
-            if (!context.mounted) return;
-            context.read<HomeBloc>().add(JoinSessionEvent(sessionId: result));
-          }
-        },
-        child: const Icon(Icons.search_off_rounded),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showModalBottomSheet(context: context, builder: (_) => const SettingsModal());
+            },
+            icon: const Icon(Icons.tune_rounded),
+          ),
+        ],
       ),
       body: BlocListener<HomeBloc, HomeState>(
         listenWhen: (prev, curr) => curr.effect != prev.effect,
@@ -79,192 +83,80 @@ class _HomeScreenState extends State<HomeScreen> {
             if (context.mounted) context.push('/session/${effect.sessionId}');
           }
         },
-        child: Scrollbar(
-          controller: PrimaryScrollController.of(context),
-          child: SingleChildScrollView(
-            controller: PrimaryScrollController.of(context),
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      flex: 1,
-                      child: Text('Player Count'),
+        child: Column(
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  DrawableCanvas(
+                    drawables: drawables,
+                    enabled: true,
+                    color: currentColor,
+                    strokeWidth: 6.125,
+                    drawableCreated: (drawable) {
+                      setState(() => drawables.add(drawable));
+                    },
+                    drawableChanged: (drawable) {
+                      final drawableIndex = drawables.indexWhere((d) => d.id == drawable.id);
+                      if (drawableIndex <= -1) return;
+                      setState(() => drawables[drawableIndex] = drawable);
+                    },
+                    drawableCompleted: (_) {
+                      setState(() => currentColor = colors[Random().nextInt(colors.length - 1)]);
+                    },
+                  ),
+                  const Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 40.0),
+                      child: Brand(),
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: BlocSelector<HomeBloc, HomeState, int>(
-                        selector: (state) => state.maxPlayers,
-                        builder: (context, maxPlayers) {
-                          return PlusMinusButtonBar(
-                            removeCallback: () => context.read<HomeBloc>().add(
-                                  ChangeCountOnSubjectEvent(
-                                    type: CountEventType.remove,
-                                    subject: CountSubject.playerCount,
-                                  ),
-                                ),
-                            addCallback: () => context.read<HomeBloc>().add(
-                                  ChangeCountOnSubjectEvent(
-                                    type: CountEventType.add,
-                                    subject: CountSubject.playerCount,
-                                  ),
-                                ),
-                            value: maxPlayers,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      flex: 1,
-                      child: Text('Rounds'),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: BlocSelector<HomeBloc, HomeState, int>(
-                        selector: (state) => state.roundCount,
-                        builder: (context, roundCount) {
-                          return PlusMinusButtonBar(
-                            removeCallback: () => context.read<HomeBloc>().add(
-                                  ChangeCountOnSubjectEvent(
-                                    type: CountEventType.remove,
-                                    subject: CountSubject.roundCount,
-                                  ),
-                                ),
-                            addCallback: () => context.read<HomeBloc>().add(
-                                  ChangeCountOnSubjectEvent(
-                                    type: CountEventType.add,
-                                    subject: CountSubject.roundCount,
-                                  ),
-                                ),
-                            value: roundCount,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Expanded(
-                      flex: 1,
-                      child: Text('Turn Duration'),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: BlocSelector<HomeBloc, HomeState, int>(
-                        selector: (state) => state.turnDuration,
-                        builder: (context, turnDuration) {
-                          return PlusMinusButtonBar(
-                            removeCallback: () => context.read<HomeBloc>().add(
-                                  ChangeCountOnSubjectEvent(
-                                    type: CountEventType.remove,
-                                    subject: CountSubject.turnDuration,
-                                  ),
-                                ),
-                            addCallback: () => context.read<HomeBloc>().add(
-                                  ChangeCountOnSubjectEvent(
-                                    type: CountEventType.add,
-                                    subject: CountSubject.turnDuration,
-                                  ),
-                                ),
-                            value: turnDuration,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                const Divider(),
-                const SizedBox(height: 16.0),
-                BlocSelector<HomeBloc, HomeState, String?>(
-                  selector: (state) => state.word,
-                  builder: (context, word) {
-                    if (word == null) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'freestyle drawing',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => context
-                                .read<HomeBloc>()
-                                .add(PickNewWordEvent()),
-                            child: const Text('pick random topic'),
-                          ),
-                        ],
-                      );
-                    }
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          word,
-                          style: const TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => context
-                                    .read<HomeBloc>()
-                                    .add(ClearWordEvent()),
-                                child: const Text('freestyle drawing'),
-                              ),
-                            ),
-                            const SizedBox(width: 12.0),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => context
-                                    .read<HomeBloc>()
-                                    .add(PickNewWordEvent()),
-                                child: const Text('pick new topic'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                TextButton(
-                  onPressed: () =>
-                      context.read<HomeBloc>().add(CreateSessionEvent()),
-                  child: const Text('start'),
-                ),
-                TextButton(
-                  onPressed: () => context.go('/test'),
-                  child: const Text('test'),
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
+            const WideButton(
+              color: Colors.deepPurple,
+              label: 'FIND GAME',
+              icon: Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+            WideButton(
+              color: Colors.purple,
+              label: 'CREATE GAME',
+              icon: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+              callback: _handleCreateGame,
+            ),
+            const WideButton(
+              color: Colors.orangeAccent,
+              label: 'JOIN RANDOM GAME',
+              icon: Icon(
+                Icons.rocket_launch_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            )
+          ],
         ),
       ),
     );
+  }
+
+  void _handleCreateGame() async {
+    final result = await showModalBottomSheet<CreateSessionConfig?>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const CreateGameModal(),
+    );
+    if (result != null && context.mounted) {
+      context.read<HomeBloc>().add(CreateSessionEvent(config: result));
+    }
   }
 }
