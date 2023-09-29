@@ -20,11 +20,8 @@ class _SessionStrokeWidthModalState extends State<SessionStrokeWidthModal> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).pop(value);
-        return true;
-      },
+    return PopScope(
+      onPopInvoked: (_) => Navigator.of(context).pop(value),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 
 Map<String, dynamic> mapDrawableToJson(PaintDrawable drawable) {

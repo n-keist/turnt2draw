@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:turn2draw/data/service/impl/local_player_service.dart';
 import 'package:turn2draw/data/service/impl/remote_session_service.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
+import 'package:turn2draw/firebase_options.dart';
 import 'package:turn2draw/storage/impl/shared_preferences_local_storage.dart';
 import 'package:turn2draw/storage/local_storage.dart';
 
@@ -15,6 +17,10 @@ final locator = GetIt.I;
 
 Future<void> setupLocator() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   Bloc.observer = DrawAppBlocObserver();
 

@@ -46,7 +46,6 @@ class RemoteSessionService extends SessionService {
       );
       return response.statusCode == 200;
     } catch (e) {
-      log('could not join session: $sessionId', error: e);
       logger.e('could not join session $sessionId', error: e);
       return false;
     }
@@ -59,16 +58,18 @@ class RemoteSessionService extends SessionService {
         Uri.parse(httpBaseUrl).replace(
           path: '/api/session',
         ),
-        body: config.toJson(),
+        body: jsonEncode(config.toJson()),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       );
-      if (response.statusCode == 201) {
-        final json = jsonDecode(response.body);
-        return json['id'] as String;
-      }
+      if (response.statusCode != 201) return null;
+      final json = jsonDecode(response.body);
+      return json['id'] as String;
     } catch (e) {
-      log('could not create session', error: e);
+      logger.e('could not create session', error: e);
+      return null;
     }
-    return null;
   }
 
   @override

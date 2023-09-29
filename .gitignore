@@ -1,2 +1,6 @@
 .idea/
 server_socket_client/
+turn2draw/android/app/google-services.json
+turn2draw/lib/firebase_options.dart
+turn2draw/ios/Runner/GoogleService-Info.plist
+turn2draw/ios/firebase_app_id_file.json

@@ -1,5 +1,4 @@
-import 'package:flutter/widgets.dart';
-import 'package:turn2draw/data/model/paint_drawable.dart';
+part of 'drawable_canvas.dart';
 
 class CanvasPainter extends CustomPainter {
   CanvasPainter({this.drawables = const []});
@@ -25,5 +24,5 @@ class CanvasPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CanvasPainter oldDelegate) => oldDelegate.drawables != drawables;
 }

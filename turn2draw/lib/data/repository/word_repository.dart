@@ -22,6 +22,12 @@ class WordRepository {
   final LocalStorage storage;
   final http.Client client;
 
+  Future<void> fetchAllWords() async {
+    for (final type in WordType.values) {
+      await fetchWords(type: type);
+    }
+  }
+
   Future<void> fetchWords({WordType type = WordType.topic}) async {
     try {
       final eTagKey = switch (type) {
@@ -65,8 +71,6 @@ class WordRepository {
       }
     } catch (e) {
       log('could not read words', error: e);
-    } finally {
-      client.close();
     }
   }
 

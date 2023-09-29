@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/create_session_config.dart';
 import 'package:turn2draw/data/repository/word_repository.dart';
 import 'package:turn2draw/data/service/impl/local_player_service.dart';
@@ -40,9 +39,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final random = Random();
 
   void _onHomeInitEvent(HomeInitEvent event, Emitter<HomeState> emit) async {
-    for (var type in WordType.values) {
-      await wordRepository.fetchWords(type: type);
-    }
+    await wordRepository.fetchAllWords();
     final adjectives = await wordRepository.getWords(type: WordType.adjective);
     final nouns = await wordRepository.getWords(type: WordType.noun);
 
@@ -106,18 +103,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onCreateSessionEvent(CreateSessionEvent event, Emitter<HomeState> emit) async {
     final playerId = await playerService.getCurrentPlayerId();
-    if (playerId == null) return;
+    final playerName = await playerService.getCurrentPlayerName();
+
+    if (playerId == null || playerName == null) return;
+
     final config = CreateSessionConfig(
       maxPlayers: state.maxPlayers,
       roundCount: state.roundCount,
       turnDuration: state.turnDuration,
       sessionOwner: playerId,
-      ownerDisplayname: await playerService.getCurrentPlayerName() ?? '',
+      ownerDisplayname: playerName,
       word: state.word,
     );
 
     final session = await sessionService.startSession(config);
     if (session == null) return;
+
     emit(
       state.copyWith(
         effect: () => SessionEffect(type: SessionEffectType.created, sessionId: session),
@@ -129,7 +130,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final playerId = await playerService.getCurrentPlayerId();
     final playerName = await playerService.getCurrentPlayerName();
     final result = await sessionService.joinSession(event.sessionId, playerId!, playerName!, null);
-    logger.d('JOIN: $result');
     if (result) {
       emit(
         state.copyWith(

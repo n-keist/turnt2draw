@@ -1,9 +1,8 @@
-library drawable_canvas;
-
 import 'package:flutter/material.dart';
 import 'package:nanoid2/nanoid2.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
-import 'package:turn2draw/ui/common/canvas/_painter.dart';
+
+part '_painter.dart';
 
 class DrawableCanvas extends StatefulWidget {
   const DrawableCanvas({

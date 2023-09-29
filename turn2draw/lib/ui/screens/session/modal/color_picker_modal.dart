@@ -8,7 +8,7 @@ class SessionColorPickerModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -32,10 +32,7 @@ class SessionColorPickerModal extends StatelessWidget {
           ],
         ),
       ),
-      onWillPop: () async {
-        Navigator.of(context).pop(selectedColor.value);
-        return true;
-      },
+      onPopInvoked: (_) => Navigator.of(context).pop(selectedColor.value),
     );
   }
 }

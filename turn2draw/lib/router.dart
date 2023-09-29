@@ -9,7 +9,6 @@ import 'package:turn2draw/ui/_state/home/home_event.dart';
 import 'package:turn2draw/ui/_state/session/events/init_event.dart';
 import 'package:turn2draw/ui/screens/home/home.dart';
 import 'package:turn2draw/ui/screens/session/session.dart';
-import 'package:turn2draw/ui/screens/test/test_screen.dart';
 
 final router = GoRouter(
   debugLogDiagnostics: kDebugMode,
@@ -21,7 +20,7 @@ final router = GoRouter(
         create: (context) => HomeBloc(
           wordRepository: context.read<WordRepository>(),
           playerService: locator<PlayerService>(),
-          sessionService: locator<SessionService>(),
+          //sessionService: locator<SessionService>(),
         )..add(HomeInitEvent()),
         child: const HomeScreen(),
       ),
@@ -41,7 +40,5 @@ final router = GoRouter(
         );
       },
     ),
-    GoRoute(
-        path: '/test', builder: (context, state) => const TestDrawingScreen()),
   ],
 );

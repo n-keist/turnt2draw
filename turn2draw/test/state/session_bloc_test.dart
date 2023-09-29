@@ -329,8 +329,8 @@ void main() {
       setUp: () {
         when(() => socket.emit(emitSessionDrawing, any())).thenReturn(null);
       },
-      act: (b) =>
-          b.add(DrawableSessionEvent(socket: socket, drawable: PaintDrawable(), eventType: DrawableEventType.create)),
+      act: (b) => b.add(
+          DrawableSessionEvent(socket: socket, drawable: const PaintDrawable(), eventType: DrawableEventType.create)),
       verify: (b) {
         verify(() => socket.emit(emitSessionDrawing, any()));
       },
@@ -341,8 +341,8 @@ void main() {
       setUp: () {
         when(() => socket.emit(emitSessionDrawing, any())).thenReturn(null);
       },
-      act: (b) =>
-          b.add(DrawableSessionEvent(socket: socket, drawable: PaintDrawable(), eventType: DrawableEventType.update)),
+      act: (b) => b.add(
+          DrawableSessionEvent(socket: socket, drawable: const PaintDrawable(), eventType: DrawableEventType.update)),
       verify: (b) {
         verify(() => socket.emit(emitSessionDrawing, any()));
       },
@@ -354,8 +354,8 @@ void main() {
       setUp: () {
         when(() => socket.emit(emitSessionCommitDrawing, any())).thenReturn(null);
       },
-      act: (b) =>
-          b.add(DrawableSessionEvent(socket: socket, drawable: PaintDrawable(), eventType: DrawableEventType.commit)),
+      act: (b) => b.add(
+          DrawableSessionEvent(socket: socket, drawable: const PaintDrawable(), eventType: DrawableEventType.commit)),
       verify: (b) {
         verify(() => socket.emit(emitSessionCommitDrawing, any()));
       },
