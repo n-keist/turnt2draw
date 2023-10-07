@@ -1,16 +1,9 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:turn2draw/config/http.dart';
-import 'package:turn2draw/config/logger.dart';
-import 'package:turn2draw/data/model/create_session_config.dart';
-import 'package:turn2draw/data/model/session_info.dart';
-import 'package:turn2draw/data/service/session_service.dart';
-
-import 'package:http/http.dart' as http;
+part of '../session_service.dart';
 
 class RemoteSessionService extends SessionService {
-  RemoteSessionService();
+  RemoteSessionService({SharedPreferences? preferences}) : preferences = preferences ?? UnimplementedPreferences();
+
+  final SharedPreferences preferences;
 
   @override
   Future<SessionInfo?> findSession(String sessionId) async {
@@ -87,5 +80,39 @@ class RemoteSessionService extends SessionService {
       logger.e('could not begin session', error: e);
       return 'internal_error';
     }
+  }
+
+  @override
+  Future<String?> joinRandomSession(String playerId, String playerName) async {
+    try {
+      final response = await http.put(
+        Uri.parse(httpBaseUrl).replace(
+          path: '/api/session/random/join',
+        ),
+        body: jsonEncode({
+          'playerId': playerId,
+          'playerDisplayname': playerName,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode != 200) return null;
+      final json = jsonDecode(response.body);
+      return json['sessionId'];
+    } catch (e) {
+      logger.e('COULD NOT JOIN RANDOM SESSION', error: e);
+      return null;
+    }
+  }
+
+  @override
+  Future<String?> getLastSessionId() async {
+    return preferences.getString(pLastSessionId);
+  }
+
+  @override
+  Future<void> setLastSessionId(String sessionId) async {
+    await preferences.setString(pLastSessionId, sessionId);
   }
 }

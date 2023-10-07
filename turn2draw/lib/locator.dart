@@ -6,15 +6,10 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turn2draw/config/bloc_config.dart';
 import 'package:turn2draw/data/repository/word_repository.dart';
-import 'package:turn2draw/data/service/impl/local_player_service.dart';
-import 'package:turn2draw/data/service/impl/remote_session_service.dart';
-import 'package:turn2draw/data/service/impl/shared_preferences_settings_service.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
 import 'package:turn2draw/data/service/settings_service.dart';
 import 'package:turn2draw/firebase_options.dart';
-import 'package:turn2draw/storage/impl/shared_preferences_local_storage.dart';
-import 'package:turn2draw/storage/local_storage.dart';
 
 final locator = GetIt.I;
 
@@ -33,28 +28,30 @@ Future<void> setupLocator() async {
     await preferences.clear();
   }
 
-  final localStorage = SharedPreferencesLocalStorage(preferences: preferences);
-
-  locator.registerSingleton<LocalStorage>(localStorage);
-
   locator.registerSingleton<PlayerService>(
     LocalPlayerService(
-      localStorage: localStorage,
+      preferences: preferences,
     ),
   );
 
   locator.registerSingleton<SessionService>(
-    RemoteSessionService(),
+    RemoteSessionService(
+      preferences: preferences,
+    ),
   );
 
   locator.registerSingleton<SettingsService>(
     SharedPreferencesSettingsService(
-      storage: localStorage,
+      preferences: preferences,
     )..load(),
     dispose: (service) => service.dispose(),
   );
 
-  locator.registerSingleton<WordRepository>(WordRepository(storage: localStorage));
+  locator.registerSingleton<WordRepository>(
+    HttpSharedPreferencesWordRepository(
+      preferences: preferences,
+    ),
+  );
 
   await locator.allReady();
 }

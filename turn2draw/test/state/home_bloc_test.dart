@@ -25,193 +25,14 @@ void main() {
     ),
     act: (bloc) => bloc.add(HomeInitEvent()),
     setUp: () {
-      for (final type in WordType.values) {
-        when(() => repository.fetchWords(type: type)).thenAnswer((_) => Future.value(null));
-      }
+      when(() => repository.fetchAllWords()).thenAnswer((_) async => false);
       when(() => repository.getWords(type: WordType.adjective)).thenAnswer((_) async => ['green', 'blue']);
       when(() => repository.getWords(type: WordType.noun)).thenAnswer((_) async => ['hat', 'glass']);
-      when(() => playerService.createPlayerIfNotExists(any())).thenAnswer((_) async => 'some-id');
+      when(() => playerService.createPlayerIfNotExists(any())).thenAnswer((_) async => ('some-id', 'some-name'));
     },
     verify: (bloc) {
       verify(() => playerService.createPlayerIfNotExists(any())).called(1);
     },
-  );
-
-  group('ChangeCountOnSubjectEvent', () {
-    group('playerCount', () {
-      blocTest(
-        'remove',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          maxPlayers: 3,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.playerCount, type: CountEventType.remove),
-        ),
-        expect: () => [
-          const TypeMatcher<HomeState>().having((s) => s.maxPlayers, 'max players', 2),
-        ],
-      );
-      blocTest(
-        'add',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          maxPlayers: 3,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.playerCount, type: CountEventType.add),
-        ),
-        expect: () => [
-          const TypeMatcher<HomeState>().having((s) => s.maxPlayers, 'max players', 4),
-        ],
-      );
-      blocTest(
-        'min reached',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          maxPlayers: 2,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.playerCount, type: CountEventType.remove),
-        ),
-        verify: (b) => expect(b.state.maxPlayers, 2),
-      );
-      blocTest(
-        'max reached',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          maxPlayers: 99,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.playerCount, type: CountEventType.add),
-        ),
-        verify: (b) => expect(b.state.maxPlayers, 99),
-      );
-    });
-
-    group('roundCount', () {
-      blocTest(
-        'remove',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          roundCount: 3,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.roundCount, type: CountEventType.remove),
-        ),
-        expect: () => [
-          const TypeMatcher<HomeState>().having((s) => s.roundCount, 'round count', 2),
-        ],
-      );
-      blocTest(
-        'add',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          roundCount: 3,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.roundCount, type: CountEventType.add),
-        ),
-        expect: () => [
-          const TypeMatcher<HomeState>().having((s) => s.roundCount, 'round count', 4),
-        ],
-      );
-      blocTest(
-        'min reached',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          roundCount: 2,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.roundCount, type: CountEventType.remove),
-        ),
-        verify: (b) => expect(b.state.roundCount, 2),
-      );
-      blocTest(
-        'max reached',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          roundCount: 99,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.roundCount, type: CountEventType.add),
-        ),
-        verify: (b) => expect(b.state.roundCount, 99),
-      );
-    });
-
-    group('turnDuration', () {
-      blocTest(
-        'remove',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          turnDuration: 10,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.turnDuration, type: CountEventType.remove),
-        ),
-        expect: () => [
-          const TypeMatcher<HomeState>().having((s) => s.turnDuration, 'turn duration', 5),
-        ],
-      );
-      blocTest(
-        'add',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          turnDuration: 5,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.turnDuration, type: CountEventType.add),
-        ),
-        expect: () => [
-          const TypeMatcher<HomeState>().having((s) => s.turnDuration, 'round count', 10),
-        ],
-      );
-      blocTest(
-        'min reached',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          turnDuration: 5,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.turnDuration, type: CountEventType.remove),
-        ),
-        verify: (b) => expect(b.state.turnDuration, 5),
-      );
-      blocTest(
-        'max reached',
-        build: () => HomeBloc(),
-        seed: () => const HomeState(
-          turnDuration: 120,
-        ),
-        act: (bloc) => bloc.add(
-          ChangeCountOnSubjectEvent(subject: CountSubject.turnDuration, type: CountEventType.add),
-        ),
-        verify: (b) => expect(b.state.turnDuration, 120),
-      );
-    });
-  });
-
-  blocTest(
-    'ClearWordEvent',
-    build: () => HomeBloc(),
-    seed: () => const HomeState(word: 'some-word'),
-    act: (bloc) => bloc.add(ClearWordEvent()),
-    expect: () => [const HomeState()],
-  );
-
-  blocTest(
-    'PickNewWordEvent',
-    build: () => HomeBloc(
-      wordRepository: repository,
-    ),
-    setUp: () {
-      when(() => repository.getWords()).thenAnswer((_) async => ['cool-topic']);
-    },
-    act: (bloc) => bloc.add(PickNewWordEvent()),
-    expect: () => [
-      const HomeState(word: 'cool-topic'),
-    ],
   );
 
   blocTest(
@@ -220,20 +41,10 @@ void main() {
       playerService: playerService,
       sessionService: sessionService,
     ),
-    seed: () => const HomeState(
-      maxPlayers: 5,
-      roundCount: 5,
-      turnDuration: 10,
-      word: 'my-word',
-    ),
     setUp: () {
       const config = CreateSessionConfig(
         sessionOwner: 'player-id',
         ownerDisplayname: 'player-name',
-        maxPlayers: 5,
-        roundCount: 5,
-        turnDuration: 10,
-        word: 'my-word',
       );
       when(() => playerService.getCurrentPlayerId()).thenAnswer((_) async => config.sessionOwner);
       when(() => playerService.getCurrentPlayerName()).thenAnswer((_) async => config.ownerDisplayname);
@@ -261,7 +72,7 @@ void main() {
 
       when(() => sessionService.joinSession('some-id', 'some-id', 'some-name', null)).thenAnswer((_) async => true);
     },
-    act: (b) => b.add(JoinSessionEvent(sessionId: 'some-id')),
+    act: (b) => b.add(JoinSessionEvent(sessionCode: 'some-id')),
     verify: (b) {
       expect(b.state.effect, isNotNull);
       expect(b.state.effect, isA<SessionEffect>());

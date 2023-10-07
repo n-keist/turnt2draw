@@ -24,6 +24,11 @@ export class SessionController {
         return response.status(joined ? 200 : 500).end();
     };
 
+    joinRandomSession = async (request: Request, response: Response) => {
+        const joined: string | undefined = await this.service.joinRandomSession(request.body.playerId?.toString() || '', request.body.playerDisplayname?.toString() || '');
+        return response.status(joined ? 200 : 404).json({ sessionId: joined });
+    };
+
     beginSession = async (request: Request, response: Response) => {
         const sessionId: string = request.params.id;
         if (!sessionId) return response.status(400).json({

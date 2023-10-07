@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:turn2draw/config/preferences_keys.dart';
 import 'package:turn2draw/data/service/settings_service.dart';
 import 'package:turn2draw/locator.dart';
 
 class SettingsModal extends StatelessWidget {
-  const SettingsModal({super.key});
+  const SettingsModal({super.key, this.usernameCallback});
+
+  final VoidCallback? usernameCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class SettingsModal extends StatelessWidget {
         ListTile(
           title: const Text('Regenerate Username'),
           trailing: IconButton.filledTonal(
-            onPressed: () => false,
+            onPressed: usernameCallback,
             icon: const Icon(Icons.refresh_rounded),
           ),
         ),
@@ -25,7 +26,7 @@ class SettingsModal extends StatelessWidget {
             return SwitchListTile.adaptive(
               title: const Text('Haptic Feedback'),
               value: locator<SettingsService>().settings.hapticFeedback,
-              onChanged: (value) => locator<SettingsService>().setSettingsProperty(pSettingsHapticFeed, value),
+              onChanged: (value) => locator<SettingsService>().setHapticFeedback(value),
             );
           },
         ),

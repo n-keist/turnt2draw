@@ -2,16 +2,19 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:turn2draw/data/model/create_session_config.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 import 'package:turn2draw/data/model/player.dart';
+import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/home/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/home/home_event.dart';
 import 'package:turn2draw/ui/common/brand.dart';
 import 'package:turn2draw/ui/common/canvas/drawable_canvas.dart';
+import 'package:turn2draw/ui/common/dialog/message_dialog.dart';
 import 'package:turn2draw/ui/common/input/wide_button.dart';
 import 'package:turn2draw/ui/screens/home/home.dart';
 import 'package:turn2draw/ui/screens/home/modal/create_game_modal.dart';
@@ -68,7 +71,15 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              showModalBottomSheet(context: context, builder: (_) => const SettingsModal());
+              showModalBottomSheet(
+                context: context,
+                builder: (_) => SettingsModal(
+                  usernameCallback: () {
+                    context.read<HomeBloc>().add(PlayerEvent());
+                    HapticFeedback.lightImpact();
+                  },
+                ),
+              );
             },
             icon: const Icon(Icons.tune_rounded),
           ),
@@ -81,6 +92,17 @@ class _HomeScreenState extends State<HomeScreen> {
             final effect = state.effect as SessionEffect;
             await Future.delayed(const Duration(milliseconds: 25));
             if (context.mounted) context.push('/session/${effect.sessionId}');
+            return;
+          }
+          if (state.effect != null && state.effect is DialogEffect) {
+            final effect = state.effect as DialogEffect;
+            showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              builder: (_) => MessageDialog(title: effect.title, body: effect.body),
+            );
           }
         },
         child: Column(
@@ -134,14 +156,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               callback: _handleCreateGame,
             ),
-            const WideButton(
+            WideButton(
               color: Colors.orangeAccent,
               label: 'JOIN RANDOM GAME',
-              icon: Icon(
+              icon: const Icon(
                 Icons.rocket_launch_rounded,
                 color: Colors.white,
                 size: 40,
               ),
+              callback: () => context.read<HomeBloc>().add(JoinSessionEvent()),
             )
           ],
         ),

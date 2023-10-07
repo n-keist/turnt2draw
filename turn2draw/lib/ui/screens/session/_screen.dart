@@ -1,13 +1,11 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:turn2draw/config/http.dart';
-import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/session_info.dart';
+import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
+import 'package:turn2draw/ui/common/dialog/message_dialog.dart';
 import 'package:turn2draw/ui/screens/session/session.dart';
 import 'package:turn2draw/ui/screens/session/view_state/drawing.dart';
 import 'package:turn2draw/ui/screens/session/view_state/waiting.dart';
@@ -30,15 +28,16 @@ class _SessionScreenState extends State<SessionScreen> {
       socket_io.OptionBuilder().setTransports(['websocket']).disableAutoConnect().build(),
     )..connect();
 
-    socket.onAny(
-      (event, data) => context.read<SessionBloc>().add(
+    socket.onAny((event, data) {
+      if (!context.mounted) return;
+      context.read<SessionBloc>().add(
             SocketSessionEvent(
               socket: socket,
               event: event,
               payload: (data != null ? Map<String, dynamic>.from(data) : null),
             ),
-          ),
-    );
+          );
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final id = GoRouterState.of(context).pathParameters['id'];
@@ -78,31 +77,17 @@ class _SessionScreenState extends State<SessionScreen> {
   }
 
   void _sessionListener(BuildContext context, SessionState state) async {
-    logger.d('LISTEN TO ME');
     if (state.effect != null && state.effect is EndSessionEffect) {
       return context.go('/');
     }
-    if (state.effect != null && state.effect is NotEnoughPlayersSessionEffect) {
-      logger.d('show dialog!');
-      return await showDialog(
+    if (state.effect != null && state.effect is DialogEffect) {
+      final effect = state.effect as DialogEffect;
+      showModalBottomSheet(
         context: context,
-        builder: (context) => AlertDialog.adaptive(
-          title: const Text('hold up'),
-          content: const Text('To begin a game, there are at least 2 players required.'),
-          actions: [
-            if (Platform.isIOS)
-              CupertinoDialogAction(
-                isDefaultAction: true,
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Okay'),
-              )
-            else
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Okay'),
-              ),
-          ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
         ),
+        builder: (_) => MessageDialog(title: effect.title, body: effect.body),
       );
     }
   }

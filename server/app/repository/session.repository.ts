@@ -22,6 +22,12 @@ export class SessionRepository {
         return rows[0];
     };
 
+    findRandomSession = async (): Promise<DBSession | undefined> => {
+        const rows: DBSession[] = await this.database.pool.query('select * from sessions where session_state = ? order by rand() limit 1', ['waiting']);
+        if (rows.length == 0) return undefined;
+        return rows[0];
+    };
+
     createSession = async (config: CreateSessionConfig): Promise<string | undefined> => {
         try {
             const rows: any[] = await this.database.pool.query(
@@ -36,6 +42,12 @@ export class SessionRepository {
         }
     };
 
+    setOwner = async (sessionId: string, playerId: string): Promise<void> => {
+        await this.database.pool.execute('UPDATE sessions SET session_owner = ? WHERE session_id = ?;', [
+            playerId, sessionId,
+        ]);
+    };
+
     joinSession = async (sessionId: string, playerId: string, playerDisplayname: string): Promise<boolean> => {
         try {
             const sessionQuery: DBSession[] = await this.database.pool.query(
@@ -43,7 +55,7 @@ export class SessionRepository {
                 [sessionId]
             );
             if (sessionQuery.length === 0) return false;
-            console.log('session found');
+
             const playerCountQuery: any[] = await this.database.pool.query(
                 'SELECT COUNT(*) AS player_count FROM players WHERE player_session = ?;',
                 [sessionId],
@@ -51,13 +63,19 @@ export class SessionRepository {
             const count = playerCountQuery[0].player_count;
 
             if (count >= sessionQuery[0].session_max_players) return false;
-            console.log('session constraints ok');
+
             await this.database.pool.execute('INSERT INTO players (player_id, player_session, player_displayname) VALUES (?, ?, ?);', [playerId, sessionId, playerDisplayname]);
             return true;
         } catch (error) {
             console.error(error);
             return false;
         }
+    };
+
+    leaveSession = async (sessionId: string, playerId: string) => {
+        await this.database.pool.execute('DELETE FROM players WHERE player_id = ? AND player_session = ?;', [
+            playerId, sessionId,
+        ]);
     };
 
     beginSession = async (sessionId: string) => {

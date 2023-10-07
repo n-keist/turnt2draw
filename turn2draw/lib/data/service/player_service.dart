@@ -1,3 +1,10 @@
+import 'package:nanoid2/nanoid2.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:turn2draw/config/preferences_keys.dart';
+import 'package:turn2draw/data/unimplemented_preferences.dart';
+
+part 'impl/local_player_service.dart';
+
 abstract class PlayerService {
   /// returns current player id (if any)
   Future<String?> getCurrentPlayerId();

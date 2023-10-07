@@ -5,10 +5,9 @@ import 'package:turn2draw/data/mapping/drawable_mapping.dart';
 import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/data/model/turn_info.dart';
-import 'package:turn2draw/data/service/impl/local_player_service.dart';
-import 'package:turn2draw/data/service/impl/remote_session_service.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
+import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/player_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
@@ -70,7 +69,13 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   void _onSessionSocketEvent(SocketSessionEvent event, Emitter<SessionState> emit) async {
     logger.d('SOCKET: "${event.event}" payload?: ${event.payload != null}');
     if (event.event == onConnect) {
-      event.socket.emit(emitPlayerCheckIn, state.info.id);
+      event.socket.emit(
+        emitPlayerCheckIn,
+        {
+          'room': state.info.id,
+          'playerId': state.self.playerId,
+        },
+      );
       return;
     }
 
@@ -113,6 +118,20 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
       emit(
         state.copyWith(effect: () => UpdateDrawableEffect(drawable: drawable)),
       );
+      return;
+    }
+    if (event.event == onSessionState) {
+      if (event.payload == null) throw 'unexpected null payload on ${event.event}';
+      final sessionInfo = SessionInfo.parseJson(event.payload!['info']);
+      final players = (event.payload!['players']).map<Player>((json) => Player.parseJson(json)).toList(growable: true);
+
+      emit(
+        state.copyWith(
+          info: () => sessionInfo,
+          players: () => players,
+        ),
+      );
+      return;
     }
   }
 
@@ -153,7 +172,10 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     if (result == null) return state.copyWith();
     return switch (result) {
       'NOT_ENOUGH_PLAYERS' => state.copyWith(
-          effect: () => NotEnoughPlayersSessionEffect(),
+          effect: () => DialogEffect(
+            title: 'WAIT!',
+            body: 'There\'s a minimum of 2 (two) players required to play!',
+          ),
         ),
       _ => throw 'unknown error type $result',
     };

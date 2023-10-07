@@ -4,6 +4,7 @@ const onSessionStateUpdate = 'session.state.update';
 const onSessionNextTurn = 'session.nextTurn';
 const onSessionDrawables = 'session.draw';
 const onSessionFinished = 'session.finished';
+const onSessionState = 'session.state';
 
 const emitPlayerCheckIn = 'session.checkIn';
 const emitSessionBegin = 'session.begin';

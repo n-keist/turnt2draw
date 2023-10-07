@@ -4,28 +4,28 @@ import 'package:mocktail/mocktail.dart';
 import 'package:turn2draw/data/repository/word_repository.dart';
 
 import '../mock/http_client_mock.dart';
-import '../mock/local_storage_mock.dart';
+import '../mock/shared_preferences_mock.dart';
 
 void main() {
-  final storage = MockLocalStorage();
+  final preferences = MockSharedPreferences();
   final client = MockClient();
 
   late WordRepository repository;
 
   setUp(() {
-    reset(storage);
+    reset(preferences);
     reset(client);
 
-    repository = WordRepository(storage: storage, client: client);
+    repository = HttpSharedPreferencesWordRepository(client: client, preferences: preferences);
   });
 
   setUpAll(() => registerFallbackValue(FakeUri()));
 
   group('#fetchWords', () {
     test('get topic list', () async {
-      when(() => storage.read<String?>(any())).thenAnswer((_) async => 'some-e-tag');
-      when(() => storage.write<String>(any(), any())).thenAnswer((_) async {});
-      when(() => storage.write<List<String>>(any(), any())).thenAnswer((_) async {});
+      when(() => preferences.getString(any())).thenAnswer((_) => 'some-e-tag');
+      when(() => preferences.setString(any(), any())).thenAnswer((_) async => true);
+      when(() => preferences.setStringList(any(), any())).thenAnswer((_) async => true);
 
       when(() => client.get(any(), headers: any(named: 'headers'))).thenAnswer(
         (_) async => Response('["some", "word", "list"]', 200),
@@ -33,25 +33,25 @@ void main() {
 
       await repository.fetchWords();
 
-      verify(() => storage.write<List<String>>(any(), any()));
+      verify(() => preferences.setStringList(any(), any()));
     });
 
     test('get topic list throws', () async {
-      when(() => storage.read<String?>(any())).thenAnswer((_) async => 'some-e-tag');
-      when(() => storage.write<String>(any(), any())).thenAnswer((_) async {});
-      when(() => storage.write<List<String>>(any(), any())).thenAnswer((_) async {});
+      when(() => preferences.getString(any())).thenAnswer((_) => 'some-e-tag');
+      when(() => preferences.setString(any(), any())).thenAnswer((_) async => true);
+      when(() => preferences.setStringList(any(), any())).thenAnswer((_) async => true);
 
       when(() => client.get(any(), headers: any(named: 'headers'))).thenThrow('some error');
 
       await repository.fetchWords();
 
-      verifyNever(() => storage.write<List<String>>(any(), any()));
+      verifyNever(() => preferences.setStringList(any(), any()));
     });
 
     test('get noun list', () async {
-      when(() => storage.read<String?>(any())).thenAnswer((_) async => 'some-e-tag');
-      when(() => storage.write<String>(any(), any())).thenAnswer((_) async {});
-      when(() => storage.write<List<String>>(any(), any())).thenAnswer((_) async {});
+      when(() => preferences.getString(any())).thenAnswer((_) => 'some-e-tag');
+      when(() => preferences.setString(any(), any())).thenAnswer((_) async => true);
+      when(() => preferences.setStringList(any(), any())).thenAnswer((_) async => true);
 
       when(() => client.get(any(), headers: any(named: 'headers'))).thenAnswer(
         (_) async => Response('["some", "word", "list"]', 200),
@@ -59,13 +59,13 @@ void main() {
 
       await repository.fetchWords(type: WordType.noun);
 
-      verify(() => storage.write<List<String>>(any(), any()));
+      verify(() => preferences.setStringList(any(), any()));
     });
 
     test('get adjective list (with e tag)', () async {
-      when(() => storage.read<String?>(any())).thenAnswer((_) async => 'some-e-tag');
-      when(() => storage.write<String>(any(), any())).thenAnswer((_) async {});
-      when(() => storage.write<List<String>>(any(), any())).thenAnswer((_) async {});
+      when(() => preferences.getString(any())).thenAnswer((_) => 'some-e-tag');
+      when(() => preferences.setString(any(), any())).thenAnswer((_) async => true);
+      when(() => preferences.setStringList(any(), any())).thenAnswer((_) async => true);
 
       when(() => client.get(any(), headers: any(named: 'headers'))).thenAnswer(
         (_) async => Response(
@@ -79,27 +79,27 @@ void main() {
 
       await repository.fetchWords(type: WordType.adjective);
 
-      verify(() => storage.write<List<String>>(any(), any()));
-      verify(() => storage.write<String>(any(), 'some-e-tag'));
+      verify(() => preferences.setStringList(any(), any()));
+      verify(() => preferences.setString(any(), 'some-e-tag'));
     });
   });
 
   group('#getWords', () {
     test('null', () async {
-      when(() => storage.read<List<String>?>(any())).thenAnswer((_) async => null);
+      when(() => preferences.getStringList(any())).thenAnswer((_) => null);
       expect(await repository.getWords(), []);
     });
 
     test('topic', () async {
-      when(() => storage.read<List<String>?>(any())).thenAnswer((_) async => ['a', 'b']);
+      when(() => preferences.getStringList(any())).thenAnswer((_) => ['a', 'b']);
       expect(await repository.getWords(), ['a', 'b']);
     });
     test('noun', () async {
-      when(() => storage.read<List<String>?>(any())).thenAnswer((_) async => ['a', 'b']);
+      when(() => preferences.getStringList(any())).thenAnswer((_) => ['a', 'b']);
       expect(await repository.getWords(type: WordType.noun), ['a', 'b']);
     });
     test('adj', () async {
-      when(() => storage.read<List<String>?>(any())).thenAnswer((_) async => ['a', 'b']);
+      when(() => preferences.getStringList(any())).thenAnswer((_) => ['a', 'b']);
       expect(await repository.getWords(type: WordType.adjective), ['a', 'b']);
     });
   });

@@ -17,7 +17,7 @@ final router = GoRouter(
       builder: (_, __) => BlocProvider(
         lazy: false,
         create: (context) => HomeBloc(
-          wordRepository: context.read<WordRepository>(),
+          wordRepository: locator<WordRepository>(),
           playerService: locator<PlayerService>(),
           //sessionService: locator<SessionService>(),
         ),

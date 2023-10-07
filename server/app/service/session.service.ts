@@ -22,6 +22,14 @@ export class SessionService {
         return this.playerRepository.getPlayersBySession(sessionId);
     };
 
+    joinRandomSession = async (playerId: string, playerName: string): Promise<string | undefined> => {
+        const session = await this.sessionRepository.findRandomSession();
+        if (!session) return undefined;
+        const joined = await this.sessionRepository.joinSession(session.session_id, playerId, playerName);
+        if (joined) return session.session_id;
+        return undefined;
+    };
+
     beginSession = async (sessionId: string): Promise<string | undefined> => {
 
         const sessionInfo = await this.getSession(sessionId);
