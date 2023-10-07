@@ -6,6 +6,7 @@ import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/common/dialog/message_dialog.dart';
+import 'package:turn2draw/ui/screens/session/modal/confirm_exit.dart';
 import 'package:turn2draw/ui/screens/session/session.dart';
 import 'package:turn2draw/ui/screens/session/view_state/drawing.dart';
 import 'package:turn2draw/ui/screens/session/view_state/waiting.dart';
@@ -57,20 +58,27 @@ class _SessionScreenState extends State<SessionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SessionBloc, SessionState>(
-      listenWhen: (_, __) => true,
-      listener: _sessionListener,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: BlocSelector<SessionBloc, SessionState, SessionInfo>(
-          selector: (state) => state.info,
-          builder: (context, sessionInfo) {
-            return switch (sessionInfo.state) {
-              GameState.waiting => SessionWaitingView(socket: socket),
-              GameState.playing => SessionDrawingView(socket: socket),
-              _ => throw 'you should not be here!',
-            };
-          },
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (_) async {
+        final result = await showModalBottomSheet<bool?>(context: context, builder: (_) => const ConfirmExitModal());
+        if ((result ?? false) && context.mounted) Navigator.of(context).pop();
+      },
+      child: BlocListener<SessionBloc, SessionState>(
+        listenWhen: (_, __) => true,
+        listener: _sessionListener,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: BlocSelector<SessionBloc, SessionState, SessionInfo>(
+            selector: (state) => state.info,
+            builder: (context, sessionInfo) {
+              return switch (sessionInfo.state) {
+                GameState.waiting => SessionWaitingView(socket: socket),
+                GameState.playing => SessionDrawingView(socket: socket),
+                _ => throw 'you should not be here!',
+              };
+            },
+          ),
         ),
       ),
     );
@@ -84,9 +92,6 @@ class _SessionScreenState extends State<SessionScreen> {
       final effect = state.effect as DialogEffect;
       showModalBottomSheet(
         context: context,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
         builder: (_) => MessageDialog(title: effect.title, body: effect.body),
       );
     }

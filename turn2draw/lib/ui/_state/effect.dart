@@ -1,9 +1,9 @@
-import 'dart:math';
+import 'package:nanoid2/nanoid2.dart';
 
 abstract class Effect {
-  Effect() : _effectId = Random().nextInt(25565);
+  Effect() : _effectId = nanoid();
 
-  final int _effectId;
+  final String _effectId;
 
-  int get effectId => _effectId;
+  String get effectId => _effectId;
 }

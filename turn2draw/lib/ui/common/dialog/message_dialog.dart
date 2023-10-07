@@ -2,10 +2,13 @@ import 'package:flutter/widgets.dart';
 import 'package:turn2draw/ui/common/input/wide_button.dart';
 
 class MessageDialog extends StatelessWidget {
-  const MessageDialog({super.key, required this.title, required this.body});
+  const MessageDialog({super.key, required this.title, required this.body, this.callback, this.callbackText = 'RETRY'});
 
   final String title;
   final String body;
+
+  final VoidCallback? callback;
+  final String callbackText;
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +42,8 @@ class MessageDialog extends StatelessWidget {
           ),
         ),
         WideButton(
-          label: 'OKAY',
-          callback: () => Navigator.of(context).pop(),
+          label: callback != null ? callbackText : 'OKAY',
+          callback: callback ?? () => Navigator.of(context).pop(),
         ),
       ],
     );

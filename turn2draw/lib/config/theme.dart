@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 final lightTheme = ThemeData(
-  //fontFamily: 'ComingSoon',
-  //applyElevationOverlayColor: true,
   appBarTheme: AppBarTheme(
     backgroundColor: Colors.transparent,
     elevation: 0.0,
@@ -24,6 +22,11 @@ final lightTheme = ThemeData(
     style: ButtonStyle(
       elevation: MaterialStatePropertyAll(0),
       overlayColor: MaterialStatePropertyAll(Colors.transparent),
+    ),
+  ),
+  bottomSheetTheme: BottomSheetThemeData(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8.0),
     ),
   ),
 );

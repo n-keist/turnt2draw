@@ -38,16 +38,28 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final random = Random();
 
   void _onHomeInitEvent(HomeInitEvent event, Emitter<HomeState> emit) async {
-    await wordRepository.fetchAllWords();
+    try {
+      await wordRepository.fetchAllWords();
 
-    final generatedName = await _generateRandomName();
+      final generatedName = await _generateRandomName();
 
-    final (playerId, playerName) = await playerService.createPlayerIfNotExists(generatedName);
-    emit(
-      state.copyWith(
-        self: () => Player(playerId: playerId, playerDisplayname: playerName),
-      ),
-    );
+      final (playerId, playerName) = await playerService.createPlayerIfNotExists(generatedName);
+      emit(
+        state.copyWith(
+          self: () => Player(playerId: playerId, playerDisplayname: playerName),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          effect: () => DialogEffect(
+            title: 'thats... awkward',
+            body: 'Something went wrong during initial setup, please retry',
+            dismissable: false,
+          ),
+        ),
+      );
+    }
   }
 
   void _onPlayerEvent(PlayerEvent event, Emitter<HomeState> emit) async {

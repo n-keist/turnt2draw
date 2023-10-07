@@ -98,10 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
             final effect = state.effect as DialogEffect;
             showModalBottomSheet(
               context: context,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
+              isDismissible: effect.dismissable,
+              builder: (_) => MessageDialog(
+                title: effect.title,
+                body: effect.body,
+                callbackText: effect.callbackText,
+                callback: effect.dismissable ? () => context.read<HomeBloc>().add(HomeInitEvent()) : null,
               ),
-              builder: (_) => MessageDialog(title: effect.title, body: effect.body),
             );
           }
         },
