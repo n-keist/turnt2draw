@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/create_session_config.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 import 'package:turn2draw/data/model/player.dart';
@@ -52,21 +54,26 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 20,
-              child: SvgPicture.asset('assets/svg_icons/crown.svg'),
-            ),
-            const SizedBox(width: 12.0),
-            BlocSelector<HomeBloc, HomeState, Player>(
-              selector: (state) => state.self,
-              builder: (context, self) {
-                return Text(self.playerDisplayname);
-              },
-            ),
-          ],
+        title: BlocSelector<HomeBloc, HomeState, Player>(
+          selector: (state) => state.self,
+          builder: (context, player) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  child: Text(
+                    player.playerIcon,
+                    style: const TextStyle(
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                Text(player.playerDisplayname),
+              ],
+            );
+          },
         ),
         actions: [
           IconButton(
@@ -76,6 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (_) => SettingsModal(
                   usernameCallback: () {
                     context.read<HomeBloc>().add(PlayerEvent());
+                    HapticFeedback.lightImpact();
+                  },
+                  iconCallback: () {
+                    context.read<HomeBloc>().add(PlayerEvent(type: PlayerEventType.regenerateIcon));
                     HapticFeedback.lightImpact();
                   },
                 ),

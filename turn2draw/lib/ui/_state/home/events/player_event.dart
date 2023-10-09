@@ -2,6 +2,7 @@ part of '../home_event.dart';
 
 enum PlayerEventType {
   regenerateUsername,
+  regenerateIcon,
 }
 
 class PlayerEvent extends HomeEvent {

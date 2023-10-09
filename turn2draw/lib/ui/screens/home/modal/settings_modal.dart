@@ -3,9 +3,10 @@ import 'package:turn2draw/data/service/settings_service.dart';
 import 'package:turn2draw/locator.dart';
 
 class SettingsModal extends StatelessWidget {
-  const SettingsModal({super.key, this.usernameCallback});
+  const SettingsModal({super.key, this.usernameCallback, this.iconCallback});
 
   final VoidCallback? usernameCallback;
+  final VoidCallback? iconCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +15,16 @@ class SettingsModal extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24.0),
       children: [
         ListTile(
-          title: const Text('Regenerate Username'),
+          title: const Text('Raffle New Name'),
           trailing: IconButton.filledTonal(
             onPressed: usernameCallback,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ),
+        ListTile(
+          title: const Text('Raffle New Icon'),
+          trailing: IconButton.filledTonal(
+            onPressed: iconCallback,
             icon: const Icon(Icons.refresh_rounded),
           ),
         ),

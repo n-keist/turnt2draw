@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,10 +44,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       final generatedName = await _generateRandomName();
 
+      final generatedIcon = _generateRandomIcon();
+
       final (playerId, playerName) = await playerService.createPlayerIfNotExists(generatedName);
+      await playerService.setCurrentPlayerIcon(generatedIcon.shortName);
       emit(
         state.copyWith(
-          self: () => Player(playerId: playerId, playerDisplayname: playerName),
+          self: () => Player(playerId: playerId, playerDisplayname: playerName, playerIcon: generatedIcon.char),
         ),
       );
     } catch (_) {
@@ -66,15 +70,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (event.type == PlayerEventType.regenerateUsername) {
       final name = await _generateRandomName();
       await playerService.setCurrentPlayerName(name);
-      final playerId = await playerService.getCurrentPlayerId();
-      final playerName = await playerService.getCurrentPlayerName();
+      final player = await playerService.getCurrentPlayer();
       emit(
         state.copyWith(
-          self: () => Player(
-            playerId: playerId!,
-            playerDisplayname: playerName!,
-          ),
+          self: () => player,
         ),
+      );
+      return;
+    }
+    if (event.type == PlayerEventType.regenerateIcon) {
+      final icon = _generateRandomIcon();
+      await playerService.setCurrentPlayerIcon(icon.shortName);
+      final player = await playerService.getCurrentPlayer();
+      emit(
+        state.copyWith(self: () => player),
       );
       return;
     }
@@ -157,5 +166,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       nouns.elementAt(random.nextInt(nouns.length - 1)),
     ].join('_');
     return generatedName;
+  }
+
+  Emoji _generateRandomIcon() {
+    final emojis = Emoji.byGroup(EmojiGroup.animalsNature).toList() + Emoji.byGroup(EmojiGroup.smileysEmotion).toList();
+
+    return emojis.elementAt(Random().nextInt(emojis.length - 1));
   }
 }

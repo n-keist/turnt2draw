@@ -8,6 +8,13 @@ interface CreateSessionConfig {
     ownerDisplayname: string;
 }
 
+interface Player {
+    player_id: string;
+    player_session: string;
+    player_displayname: string;
+    player_icon: string;
+}
+
 interface DBPlayer {
     player_id: string;
     player_session: string;

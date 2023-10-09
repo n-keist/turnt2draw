@@ -3,13 +3,13 @@ import { SessionService } from '../service/session.service';
 
 export default (server: SocketServer, socket: Socket, service: SessionService) => {
 
-    socket.on('session.checkIn', async (data: any) => {
-        socket.data.artRoom = data.room;
-        socket.data.artPlayerId = data.playerId;
+    socket.on('session.checkIn', async (data: Player) => {
+        socket.data.artRoom = data.player_session;
+        socket.data.artPlayerId = data.player_id;
 
-        await socket.join(data.room);
-        const players = await service.getPlayers(data.room);
-        server.to(data.room).emit('session.players', { players });
+        await socket.join(data.player_session);
+        const players = await service.getPlayers(data.player_session);
+        server.to(data.player_session).emit('session.players', { players });
     });
 
     socket.on('session.draw', (data: any) => {

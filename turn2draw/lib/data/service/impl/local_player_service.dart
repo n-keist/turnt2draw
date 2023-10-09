@@ -33,4 +33,25 @@ class LocalPlayerService extends PlayerService {
     await preferences.setString(pGeneratedUsername, playerName);
     return playerName;
   }
+
+  @override
+  Future<String?> getCurrentPlayerIcon() async {
+    final icon = preferences.getString(pGeneratedUserIcon);
+    if (icon == null) return null;
+    return Emoji.byShortName(icon)?.char;
+  }
+
+  @override
+  Future<void> setCurrentPlayerIcon(String icon) async {
+    await preferences.setString(pGeneratedUserIcon, icon);
+  }
+
+  @override
+  Future<Player> getCurrentPlayer() async {
+    return Player(
+      playerId: await getCurrentPlayerId() ?? '',
+      playerDisplayname: await getCurrentPlayerName() ?? '',
+      playerIcon: await getCurrentPlayerIcon() ?? '',
+    );
+  }
 }

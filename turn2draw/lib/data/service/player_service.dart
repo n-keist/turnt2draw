@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:emojis/emoji.dart';
 import 'package:nanoid2/nanoid2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turn2draw/config/preferences_keys.dart';
+import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/data/unimplemented_preferences.dart';
 
 part 'impl/local_player_service.dart';
@@ -19,4 +23,13 @@ abstract class PlayerService {
 
   /// writes the current player name to local storage
   Future<String> setCurrentPlayerName(String playerName);
+
+  /// stores the selected icon in local storage
+  Future<void> setCurrentPlayerIcon(String icon);
+
+  /// retrives stored icon
+  Future<String?> getCurrentPlayerIcon();
+
+  /// returns the whole player object with local stored properties
+  Future<Player> getCurrentPlayer();
 }

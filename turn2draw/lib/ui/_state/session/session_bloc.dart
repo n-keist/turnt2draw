@@ -32,23 +32,11 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   final PlayerService playerService;
 
   void _onInitSessionEvent(InitSessionEvent event, Emitter<SessionState> emit) async {
-    final playerId = await playerService.getCurrentPlayerId(), playerName = await playerService.getCurrentPlayerName();
-
-    if (playerId == null || playerName == null) {
-      emit(
-        state.copyWith(
-          effect: () => NoPlayerInfoEffect(),
-        ),
-      );
-      return;
-    }
+    final player = await playerService.getCurrentPlayer();
 
     emit(
       state.copyWith(
-        self: () => Player(
-          playerId: playerId,
-          playerDisplayname: playerName,
-        ),
+        self: () => player,
       ),
     );
   }
@@ -71,10 +59,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     if (event.event == onConnect) {
       event.socket.emit(
         emitPlayerCheckIn,
-        {
-          'room': state.info.id,
-          'playerId': state.self.playerId,
-        },
+        state.self.copyWith(playerSession: () => state.info.id).toJson(),
       );
       return;
     }
