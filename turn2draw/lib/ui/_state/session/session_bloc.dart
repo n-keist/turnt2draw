@@ -8,7 +8,6 @@ import 'package:turn2draw/data/model/turn_info.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
 import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
-import 'package:turn2draw/ui/_state/session/effects/player_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';

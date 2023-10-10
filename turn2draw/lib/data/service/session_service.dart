@@ -1,4 +1,5 @@
 import 'package:turn2draw/data/model/create_session_config.dart';
+import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/data/model/session_info.dart';
 import 'dart:convert';
 import 'dart:developer';
@@ -24,12 +25,7 @@ abstract class SessionService {
   /// joins a session by id
   ///
   /// returns [true] if successful
-  Future<bool> joinSession(
-    String sessionId,
-    String playerId,
-    String playerDisplayname,
-    String? playerNotificationHandle,
-  );
+  Future<bool> joinSession(Player player);
 
   /// creates a session by [config]
   ///
@@ -45,7 +41,7 @@ abstract class SessionService {
   /// joins a session which is selected by the server
   ///
   /// returns null if no session was found, otherwise the session id which was joined
-  Future<String?> joinRandomSession(String playerId, String playerName);
+  Future<String?> joinRandomSession(Player player);
 
   /// writes the last joined session to local storage
   Future<void> setLastSessionId(String sessionId);

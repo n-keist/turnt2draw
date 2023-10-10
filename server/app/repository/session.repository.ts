@@ -48,23 +48,23 @@ export class SessionRepository {
         ]);
     };
 
-    joinSession = async (sessionId: string, playerId: string, playerDisplayname: string): Promise<boolean> => {
+    joinSession = async (player: Player): Promise<boolean> => {
         try {
             const sessionQuery: DBSession[] = await this.database.pool.query(
                 'SELECT * FROM sessions WHERE session_id = ?;',
-                [sessionId]
+                [player.player_session]
             );
             if (sessionQuery.length === 0) return false;
 
             const playerCountQuery: any[] = await this.database.pool.query(
                 'SELECT COUNT(*) AS player_count FROM players WHERE player_session = ?;',
-                [sessionId],
+                [player.player_session],
             );
             const count = playerCountQuery[0].player_count;
 
             if (count >= sessionQuery[0].session_max_players) return false;
 
-            await this.database.pool.execute('INSERT INTO players (player_id, player_session, player_displayname) VALUES (?, ?, ?);', [playerId, sessionId, playerDisplayname]);
+            await this.database.pool.execute('INSERT INTO players (player_id, player_session, player_displayname, player_icon) VALUES (?, ?, ?, ?);', [player.player_id, player.player_session, player.player_displayname, player.player_icon]);
             return true;
         } catch (error) {
             console.error(error);

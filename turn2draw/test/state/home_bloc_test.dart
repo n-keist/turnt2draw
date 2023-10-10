@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:turn2draw/data/model/create_session_config.dart';
+import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/data/repository/word_repository.dart';
 import 'package:turn2draw/ui/_state/home/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/home/home_event.dart';
@@ -70,7 +71,9 @@ void main() {
       when(() => playerService.getCurrentPlayerId()).thenAnswer((_) async => 'some-id');
       when(() => playerService.getCurrentPlayerName()).thenAnswer((_) async => 'some-name');
 
-      when(() => sessionService.joinSession('some-id', 'some-id', 'some-name', null)).thenAnswer((_) async => true);
+      when(() => playerService.getCurrentPlayer()).thenAnswer((_) async => const Player());
+
+      when(() => sessionService.joinSession(const Player())).thenAnswer((_) async => true);
     },
     act: (b) => b.add(JoinSessionEvent(sessionCode: 'some-id')),
     verify: (b) {

@@ -120,12 +120,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onJoinSessionEvent(JoinSessionEvent event, Emitter<HomeState> emit) async {
-    final playerId = await playerService.getCurrentPlayerId();
-    final playerName = await playerService.getCurrentPlayerName();
+    final player = await playerService.getCurrentPlayer();
 
     // If no session code, find a random available game
     if (event.sessionCode == null) {
-      final result = await sessionService.joinRandomSession(playerId!, playerName!);
+      final result = await sessionService.joinRandomSession(player);
 
       /// no available game found
       if (result == null) {
@@ -146,7 +145,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       return;
     }
 
-    final result = await sessionService.joinSession(event.sessionCode!, playerId!, playerName!, null);
+    final result = await sessionService.joinSession(player);
     if (result) {
       emit(
         state.copyWith(

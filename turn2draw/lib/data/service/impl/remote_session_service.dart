@@ -21,25 +21,20 @@ class RemoteSessionService extends SessionService {
   }
 
   @override
-  Future<bool> joinSession(
-      String sessionId, String playerId, String playerDisplayname, String? playerNotificationHandle) async {
+  Future<bool> joinSession(Player player) async {
     try {
       final response = await http.put(
         Uri.parse(httpBaseUrl).replace(
-          path: '/api/session/$sessionId/join',
+          path: '/api/session/${player.playerSession}/join',
         ),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: {
-          'playerId': playerId,
-          'playerDisplayname': playerDisplayname,
-          if (playerNotificationHandle != null) 'playerNotificationHandle': playerNotificationHandle,
-        },
+        body: player.toJson(),
       );
       return response.statusCode == 200;
     } catch (e) {
-      logger.e('could not join session $sessionId', error: e);
+      logger.e('could not join session ${player.playerSession}', error: e);
       return false;
     }
   }
@@ -83,16 +78,13 @@ class RemoteSessionService extends SessionService {
   }
 
   @override
-  Future<String?> joinRandomSession(String playerId, String playerName) async {
+  Future<String?> joinRandomSession(Player player) async {
     try {
       final response = await http.put(
         Uri.parse(httpBaseUrl).replace(
           path: '/api/session/random/join',
         ),
-        body: jsonEncode({
-          'playerId': playerId,
-          'playerDisplayname': playerName,
-        }),
+        body: player.toJson(),
         headers: {
           'Content-Type': 'application/json',
         },

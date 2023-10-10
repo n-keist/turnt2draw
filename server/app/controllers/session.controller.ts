@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { SessionRepository } from '../repository/session.repository';
 import { SessionService } from '../service/session.service';
+import userValidator from '../validators/user.validator';
 
 export class SessionController {
 
@@ -20,12 +20,22 @@ export class SessionController {
     };
 
     joinSession = async (request: Request, response: Response) => {
-        const joined: boolean = await this.service.getSessionRepository().joinSession(request.params.id, request.body.playerId?.toString() || '', request.body.playerDisplayname?.toString() || '');
+        if (!userValidator(request.body).validate()) {
+            return response.status(400).end();
+        }
+        let player: Player = request.body;
+        if (!player.player_session) player.player_session = request.params['id'];
+        const joined: boolean = await this.service.getSessionRepository().joinSession(player);
         return response.status(joined ? 200 : 500).end();
     };
 
     joinRandomSession = async (request: Request, response: Response) => {
-        const joined: string | undefined = await this.service.joinRandomSession(request.body.playerId?.toString() || '', request.body.playerDisplayname?.toString() || '');
+        if (!userValidator(request.body).validate()) {
+            return response.status(400).end();
+        }
+        const player: Player = request.body;
+
+        const joined: string | undefined = await this.service.joinRandomSession(player);
         return response.status(joined ? 200 : 404).json({ sessionId: joined });
     };
 

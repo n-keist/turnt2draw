@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:emojis/emoji.dart';
 import 'package:nanoid2/nanoid2.dart';
 import 'package:shared_preferences/shared_preferences.dart';

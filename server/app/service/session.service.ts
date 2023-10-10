@@ -18,14 +18,18 @@ export class SessionService {
         return session;
     };
 
-    getPlayers = (sessionId: string): Promise<DBPlayer[]> => {
+    getPlayers = (sessionId: string): Promise<Player[]> => {
         return this.playerRepository.getPlayersBySession(sessionId);
     };
 
-    joinRandomSession = async (playerId: string, playerName: string): Promise<string | undefined> => {
+    joinRandomSession = async (player: Player): Promise<string | undefined> => {
         const session = await this.sessionRepository.findRandomSession();
+
         if (!session) return undefined;
-        const joined = await this.sessionRepository.joinSession(session.session_id, playerId, playerName);
+
+        if (!player.player_session) player.player_session = session.session_id;
+
+        const joined = await this.sessionRepository.joinSession(player);
         if (joined) return session.session_id;
         return undefined;
     };

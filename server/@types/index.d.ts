@@ -15,12 +15,6 @@ interface Player {
     player_icon: string;
 }
 
-interface DBPlayer {
-    player_id: string;
-    player_session: string;
-    player_displayname: string;
-}
-
 interface DBSession {
     session_id: string;
     session_start: Date;

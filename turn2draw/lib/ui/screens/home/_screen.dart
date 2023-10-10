@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/create_session_config.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 import 'package:turn2draw/data/model/player.dart';
