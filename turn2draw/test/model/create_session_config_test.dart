@@ -11,7 +11,6 @@ void main() {
       roundCount: 10,
       turnDuration: 200,
       sessionOwner: 'some-owner',
-      ownerDisplayname: 'some-owner-name',
     );
     expect(
       config.toJson(),
@@ -21,7 +20,6 @@ void main() {
         'roundCount': 10,
         'turnDuration': 200,
         'owner': 'some-owner',
-        'ownerDisplayname': 'some-owner-name',
         if (kDebugMode) 'id': devSessionId,
       },
     );

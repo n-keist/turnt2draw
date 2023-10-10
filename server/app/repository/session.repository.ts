@@ -1,5 +1,6 @@
 import { DrawDatabase } from '../../database';
 import { nanoid } from 'nanoid';
+import code_gen from '../util/code_gen';
 
 export class SessionRepository {
     constructor(private database: DrawDatabase) { }
@@ -22,6 +23,12 @@ export class SessionRepository {
         return rows[0];
     };
 
+    findSessionByCode = async (code: string): Promise<DBSession | undefined> => {
+        const rows: DBSession[] = await this.database.pool.query('SELECT * FROM sessions WHERE session_code = ? AND session_state = ? AND session_end IS NULL;', [code, 'waiting']);
+        if (rows.length == 0) return undefined;
+        return rows[0];
+    };
+
     findRandomSession = async (): Promise<DBSession | undefined> => {
         const rows: DBSession[] = await this.database.pool.query('select * from sessions where session_state = ? order by rand() limit 1', ['waiting']);
         if (rows.length == 0) return undefined;
@@ -30,11 +37,11 @@ export class SessionRepository {
 
     createSession = async (config: CreateSessionConfig): Promise<string | undefined> => {
         try {
+            const code = code_gen(5);
             const rows: any[] = await this.database.pool.query(
-                'INSERT INTO sessions (session_id, session_owner, session_word, session_max_players, session_round_count, session_turn_duration) VALUES (?, ?, ?, ?, ?, ?) RETURNING session_id;',
-                [config.id || nanoid(24), config.owner, config.word, config.maxPlayers, config.roundCount, config.turnDuration],
+                'INSERT INTO sessions (session_id, session_code, session_owner, session_word, session_max_players, session_round_count, session_turn_duration) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING session_id;',
+                [config.id || nanoid(24), code, config.owner, config.word, config.maxPlayers, config.roundCount, config.turnDuration],
             );
-            await this.database.pool.execute('INSERT INTO players (player_id, player_session, player_displayname) VALUES (?, ?, ?);', [config.owner, rows[0]['session_id'], config.ownerDisplayname]);
             return rows[0]['session_id'];
         } catch (error) {
             console.error(error);

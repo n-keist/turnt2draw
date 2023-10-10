@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/ui/common/input/wide_button.dart';
 import 'package:turn2draw/ui/screens/session/components/player_row.dart';
@@ -25,6 +24,7 @@ class SessionWaitingView extends StatelessWidget {
           if (!isOwner) return const SizedBox.shrink();
           return WideButton(
             label: 'START GAME',
+            foregroundColor: Colors.white,
             icon: const Icon(Icons.rocket_launch_rounded, color: Colors.white),
             callback: () => context.read<SessionBloc>().add(LocalSessionEvent(type: LocalSessionEventType.begin)),
           );
@@ -87,7 +87,7 @@ class SessionWaitingView extends StatelessWidget {
               BlocBuilder<SessionBloc, SessionState>(
                 builder: (context, state) {
                   final self = state.self;
-                  final players = List<Player>.from(state.players)..sort();
+                  final players = state.players;
                   return ListView.builder(
                     itemBuilder: (context, index) {
                       final player = players.elementAt(index);

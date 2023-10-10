@@ -12,7 +12,15 @@ export class SessionController {
         return response.status(200).json(session);
     };
 
-    startSession = async (request: Request, response: Response) => {
+    findById = async (request: Request, response: Response) => {
+        if (!request.query.code) return response.status(400).end();
+        const { code } = request.query;
+        const session: DBSession | undefined = await this.service.getSessionRepository().findSessionByCode(code as string);
+        if (session == undefined) return response.status(404).end();
+        return response.status(200).json(session);
+    };
+
+    createSession = async (request: Request, response: Response) => {
         const config: CreateSessionConfig = request.body;
         const sessionId: string | undefined = await this.service.getSessionRepository().createSession(config);
         if (!sessionId) return response.status(500).end();

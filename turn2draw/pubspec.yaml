@@ -25,6 +25,7 @@ dependencies:
   firebase_remote_config: ^4.2.6
   firebase_analytics: ^10.5.0
   emojis: ^0.9.9
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:

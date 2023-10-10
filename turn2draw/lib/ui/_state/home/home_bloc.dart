@@ -12,6 +12,7 @@ import 'package:turn2draw/data/service/session_service.dart';
 import 'package:turn2draw/ui/_state/effect.dart';
 import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/home/effects/session_effect.dart';
+import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 
 import 'home_event.dart';
 
@@ -91,13 +92,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onCreateSessionEvent(CreateSessionEvent event, Emitter<HomeState> emit) async {
     final playerId = await playerService.getCurrentPlayerId();
-    final playerName = await playerService.getCurrentPlayerName();
 
-    if (playerId == null || playerName == null) return;
+    if (playerId == null) return;
 
     final config = event.config.copyWith(
       sessionOwner: () => playerId,
-      ownerDisplayname: () => playerName,
     );
 
     final session = await sessionService.startSession(config);
@@ -145,11 +144,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       return;
     }
 
-    final result = await sessionService.joinSession(player);
+    final session = await sessionService.findSessionByCode(event.sessionCode!);
+    if (session == null) {
+      return emit(
+        state.copyWith(
+          effect: () => NotFoundSessionEffect(), // TODO
+        ),
+      );
+    }
+
+    final result = await sessionService.joinSession(
+      player.copyWith(playerSession: () => session.id),
+    );
     if (result) {
       emit(
         state.copyWith(
-          effect: () => SessionEffect(type: SessionEffectType.joined, sessionId: event.sessionCode!),
+          effect: () => SessionEffect(type: SessionEffectType.joined, sessionId: session.id),
         ),
       );
     }

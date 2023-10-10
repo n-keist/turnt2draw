@@ -45,10 +45,8 @@ void main() {
     setUp: () {
       const config = CreateSessionConfig(
         sessionOwner: 'player-id',
-        ownerDisplayname: 'player-name',
       );
       when(() => playerService.getCurrentPlayerId()).thenAnswer((_) async => config.sessionOwner);
-      when(() => playerService.getCurrentPlayerName()).thenAnswer((_) async => config.ownerDisplayname);
 
       when(() => sessionService.startSession(config)).thenAnswer(
         (_) async => 'session-id',

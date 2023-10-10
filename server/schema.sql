@@ -4,7 +4,7 @@
 -- https://tableplus.com/
 --
 -- Database: drawapp
--- Generation Time: 2023-10-10 12:03:23.5630
+-- Generation Time: 2023-10-10 18:56:30.0780
 -- -------------------------------------------------------------
 
 
@@ -30,7 +30,7 @@ CREATE TABLE `players` (
   `player_id` varchar(24) NOT NULL,
   `player_session` varchar(24) NOT NULL,
   `player_displayname` varchar(32) NOT NULL,
-  `player_icon` varchar(32) NOT NULL,
+  `player_icon` varchar(32) NOT NULL DEFAULT 'heart',
   PRIMARY KEY (`player_id`,`player_session`),
   KEY `player_session` (`player_session`),
   CONSTRAINT `players_ibfk_1` FOREIGN KEY (`player_session`) REFERENCES `sessions` (`session_id`) ON DELETE CASCADE
@@ -38,6 +38,7 @@ CREATE TABLE `players` (
 
 CREATE TABLE `sessions` (
   `session_id` varchar(24) NOT NULL,
+  `session_code` varchar(5) NOT NULL,
   `session_start` datetime NOT NULL DEFAULT current_timestamp(),
   `session_state` enum('waiting','drawing','ended') NOT NULL DEFAULT 'waiting',
   `session_word` varchar(64) DEFAULT NULL,

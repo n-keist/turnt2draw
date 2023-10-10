@@ -35,7 +35,8 @@ export class DrawServer {
         app.use(express.json());
 
         app.use((req, res, next) => {
-            console.log(`Request received: ${req.method} ${req.url}`);
+            console.log(req.body);
+
             next();
         });
 

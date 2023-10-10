@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 
 class WideButton extends StatelessWidget {
   const WideButton(
-      {super.key, this.icon, required this.label, this.callback, this.color = Colors.purple, this.height = 80});
+      {super.key,
+      this.icon,
+      required this.label,
+      this.foregroundColor = Colors.black,
+      this.callback,
+      this.color = Colors.purple,
+      this.height = 80});
 
   final Widget? icon;
   final String label;
+  final Color foregroundColor;
   final VoidCallback? callback;
   final Color color;
   final double height;
@@ -32,8 +39,8 @@ class WideButton extends StatelessWidget {
                 Align(
                   child: Text(
                     label,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: foregroundColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

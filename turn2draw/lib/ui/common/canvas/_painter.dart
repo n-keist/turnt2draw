@@ -1,9 +1,10 @@
 part of 'drawable_canvas.dart';
 
 class CanvasPainter extends CustomPainter {
-  CanvasPainter({this.drawables = const []});
+  CanvasPainter({this.drawables = const []}) : equality = const ListEquality();
 
   final List<PaintDrawable> drawables;
+  final ListEquality equality;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -24,5 +25,5 @@ class CanvasPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CanvasPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CanvasPainter oldDelegate) => !equality.equals(oldDelegate.drawables, drawables);
 }

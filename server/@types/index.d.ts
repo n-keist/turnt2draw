@@ -5,7 +5,6 @@ interface CreateSessionConfig {
     roundCount: number;
     turnDuration: number;
     owner: string;
-    ownerDisplayname: string;
 }
 
 interface Player {
@@ -17,6 +16,7 @@ interface Player {
 
 interface DBSession {
     session_id: string;
+    session_code: string;
     session_start: Date;
     session_state: string;
     session_word?: string;

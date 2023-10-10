@@ -17,6 +17,7 @@ import 'package:turn2draw/ui/common/dialog/message_dialog.dart';
 import 'package:turn2draw/ui/common/input/wide_button.dart';
 import 'package:turn2draw/ui/screens/home/home.dart';
 import 'package:turn2draw/ui/screens/home/modal/create_game_modal.dart';
+import 'package:turn2draw/ui/screens/home/modal/find_game_modal.dart';
 import 'package:turn2draw/ui/screens/home/modal/settings_modal.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -148,17 +149,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            const WideButton(
+            WideButton(
               color: Colors.deepPurple,
+              foregroundColor: Colors.white,
               label: 'FIND GAME',
-              icon: Icon(
+              icon: const Icon(
                 Icons.search_rounded,
                 color: Colors.white,
                 size: 40,
               ),
+              callback: () async {
+                final result = await showModalBottomSheet<String?>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => FindGameModal(),
+                );
+                if (result != null && context.mounted) {
+                  context.read<HomeBloc>().add(JoinSessionEvent(sessionCode: result));
+                }
+              },
             ),
             WideButton(
               color: Colors.purple,
+              foregroundColor: Colors.white,
               label: 'CREATE GAME',
               icon: const Icon(
                 Icons.add_rounded,
@@ -169,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             WideButton(
               color: Colors.orangeAccent,
+              foregroundColor: Colors.white,
               label: 'JOIN RANDOM GAME',
               icon: const Icon(
                 Icons.rocket_launch_rounded,

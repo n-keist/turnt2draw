@@ -10,7 +10,6 @@ class CreateSessionConfig extends Equatable {
     this.roundCount = 0,
     this.turnDuration = 0,
     this.sessionOwner = '',
-    this.ownerDisplayname = '',
   });
 
   factory CreateSessionConfig.empty() => const CreateSessionConfig(
@@ -25,7 +24,6 @@ class CreateSessionConfig extends Equatable {
     int Function()? roundCount,
     int Function()? turnDuration,
     String Function()? sessionOwner,
-    String Function()? ownerDisplayname,
   }) {
     return CreateSessionConfig(
       word: word.callOrElse<String?>(orElse: this.word),
@@ -33,7 +31,6 @@ class CreateSessionConfig extends Equatable {
       roundCount: roundCount.callOrElse<int>(orElse: this.roundCount),
       turnDuration: turnDuration.callOrElse<int>(orElse: this.turnDuration),
       sessionOwner: sessionOwner.callOrElse<String>(orElse: this.sessionOwner),
-      ownerDisplayname: ownerDisplayname.callOrElse<String>(orElse: this.ownerDisplayname),
     );
   }
 
@@ -42,7 +39,6 @@ class CreateSessionConfig extends Equatable {
   final int roundCount;
   final int turnDuration;
   final String sessionOwner;
-  final String ownerDisplayname;
 
   Map<String, dynamic> toJson() => {
         if (kDebugMode) 'id': devSessionId,
@@ -51,9 +47,8 @@ class CreateSessionConfig extends Equatable {
         'roundCount': roundCount,
         'turnDuration': turnDuration,
         'owner': sessionOwner,
-        'ownerDisplayname': ownerDisplayname,
       };
 
   @override
-  List<Object?> get props => [word, maxPlayers, roundCount, turnDuration, sessionOwner, ownerDisplayname];
+  List<Object?> get props => [word, maxPlayers, roundCount, turnDuration, sessionOwner];
 }

@@ -9,6 +9,8 @@ import 'package:turn2draw/ui/_state/session/session_bloc.dart';
 import 'package:turn2draw/ui/_state/session/session_event.dart';
 import 'package:turn2draw/ui/_state/session/session_state.dart';
 import 'package:turn2draw/ui/common/canvas/drawable_canvas.dart';
+import 'package:turn2draw/ui/common/input/square_button.dart';
+import 'package:turn2draw/ui/common/input/wide_button.dart';
 import 'package:turn2draw/ui/screens/session/modal/color_picker_modal.dart';
 import 'package:turn2draw/ui/screens/session/modal/stroke_width_modal.dart';
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
@@ -23,10 +25,12 @@ class SessionDrawingView extends StatefulWidget {
 }
 
 class _SessionDrawingViewState extends State<SessionDrawingView> {
-  final turnNotifier = ValueNotifier<bool>(false);
+  final strokeWidthNotifier = ValueNotifier<double>(2.25);
+  final colorNotifier = ValueNotifier<Color>(Colors.blue);
+
+  bool myTurn = false;
   List<PaintDrawable> localDrawables = <PaintDrawable>[];
-  Color color = Colors.blue;
-  double strokeWidth = 2.125;
+
   int turnDuration = 0;
   double indicatorValue = 0.0;
 
@@ -70,72 +74,56 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
         listener: _sessionListener,
         child: AspectRatio(
           aspectRatio: 9 / 12,
-          child: ValueListenableBuilder<bool>(
-            valueListenable: turnNotifier,
-            builder: (context, value, _) {
-              return DrawableCanvas(
-                drawables: localDrawables,
-                color: color,
-                enabled: value,
-                strokeWidth: strokeWidth,
-                drawableCreated: (drawable) {
-                  setState(() => localDrawables.add(drawable));
-                  context.read<SessionBloc>().add(DrawableSessionEvent(
-                      socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
-                },
-                drawableChanged: (drawable) {
-                  setState(() {
-                    final index = localDrawables.indexWhere((element) => element.id == drawable.id);
-                    if (index <= -1) return;
-                    localDrawables[index] = drawable;
-                    context.read<SessionBloc>().add(DrawableSessionEvent(
-                        socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
-                  });
-                },
-                drawableCompleted: (drawable) => context.read<SessionBloc>().add(DrawableSessionEvent(
-                    socket: widget.socket, drawable: drawable, eventType: DrawableEventType.commit)),
-              );
+          child: DrawableCanvas(
+            drawables: localDrawables,
+            color: colorNotifier.value,
+            enabled: myTurn,
+            strokeWidth: strokeWidthNotifier.value,
+            drawableCreated: (drawable) {
+              setState(() => localDrawables.add(drawable));
+              context.read<SessionBloc>().add(
+                  DrawableSessionEvent(socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
             },
+            drawableChanged: (drawable) {
+              setState(() {
+                final index = localDrawables.indexWhere((element) => element.id == drawable.id);
+                if (index <= -1) return;
+                localDrawables[index] = drawable;
+                context.read<SessionBloc>().add(DrawableSessionEvent(
+                    socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
+              });
+            },
+            drawableCompleted: (drawable) => context.read<SessionBloc>().add(
+                DrawableSessionEvent(socket: widget.socket, drawable: drawable, eventType: DrawableEventType.commit)),
           ),
         ),
       ),
-      bottomNavigationBar: AnimatedSwitcher(
+      bottomNavigationBar: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
-        child: ValueListenableBuilder(
-          valueListenable: turnNotifier,
-          builder: (context, value, child) {
-            if (!value) return const SizedBox.shrink();
-            return child!;
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(
-              left: 12.5,
-              right: 12.5,
-              bottom: 16,
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.5),
-                boxShadow: [
-                  BoxShadow(spreadRadius: 5, blurRadius: 5, color: Colors.black.withOpacity(0.125)),
-                ],
-                color: Colors.white,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    onPressed: _colorPickerCallback,
-                    icon: const Icon(Icons.brush_rounded),
-                  ),
-                  IconButton(
-                    onPressed: _strokeWidthCallback,
-                    icon: const Icon(Icons.linear_scale_rounded),
-                  ),
-                ],
+        opacity: myTurn ? 1.0 : 0.125,
+        child: Row(
+          children: [
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: colorNotifier,
+                builder: (context, value, _) {
+                  final foregroundColor = value.computeLuminance() > 0.179 ? Colors.black : Colors.white;
+                  return WideButton(
+                    color: value,
+                    icon: Icon(Icons.brush_rounded, color: foregroundColor),
+                    foregroundColor: foregroundColor,
+                    label: 'COLOR',
+                    callback: myTurn ? _colorPickerCallback : null,
+                  );
+                },
               ),
             ),
-          ),
+            SquareButton(
+              callback: myTurn ? _strokeWidthCallback : null,
+              icon: const Icon(Icons.strikethrough_s_rounded),
+              size: 80,
+            ),
+          ],
         ),
       ),
     );
@@ -153,7 +141,7 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
       });
     }
     if (state.effect != null && state.effect is MyTurnEffect) {
-      turnNotifier.value = true;
+      setState(() => myTurn = true);
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
@@ -172,7 +160,7 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
         );
     }
     if (state.effect != null && state.effect is NotMyTurnEffect) {
-      turnNotifier.value = false;
+      setState(() => myTurn = false);
       ScaffoldMessenger.of(context).clearSnackBars();
     }
     if (state.effect != null && state.effect is UpdateDrawableEffect) {
@@ -188,22 +176,18 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
   }
 
   void _colorPickerCallback() async {
-    final color = await showModalBottomSheet<Color?>(
+    showModalBottomSheet<Color?>(
       context: context,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.5)),
       isScrollControlled: true,
-      builder: (context) => SessionColorPickerModal(lastColor: this.color),
+      builder: (context) => SessionColorPickerModal(colorNotifier: colorNotifier),
     );
-    if (color == null) return;
-    setState(() => this.color = color);
   }
 
   void _strokeWidthCallback() async {
-    final strokeWidth = await showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => SessionStrokeWidthModal(value: this.strokeWidth),
+      builder: (context) => SessionStrokeWidthModal(strokeWidthNotifier: strokeWidthNotifier),
     );
-    if (strokeWidth == null) return;
-    setState(() => this.strokeWidth = strokeWidth);
   }
 }

@@ -21,6 +21,24 @@ class RemoteSessionService extends SessionService {
   }
 
   @override
+  Future<SessionInfo?> findSessionByCode(String code) async {
+    try {
+      final response = await http.get(
+        Uri.parse(httpBaseUrl).replace(
+          path: '/api/session',
+          queryParameters: {
+            'code': code,
+          },
+        ),
+      );
+      return SessionInfo.parseJson(jsonDecode(response.body));
+    } catch (e) {
+      log('could not find session by code: $code', error: e);
+      return null;
+    }
+  }
+
+  @override
   Future<bool> joinSession(Player player) async {
     try {
       final response = await http.put(
@@ -30,7 +48,7 @@ class RemoteSessionService extends SessionService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: player.toJson(),
+        body: jsonEncode(player.toJson()),
       );
       return response.statusCode == 200;
     } catch (e) {
@@ -84,7 +102,7 @@ class RemoteSessionService extends SessionService {
         Uri.parse(httpBaseUrl).replace(
           path: '/api/session/random/join',
         ),
-        body: player.toJson(),
+        body: jsonEncode(player.toJson()),
         headers: {
           'Content-Type': 'application/json',
         },

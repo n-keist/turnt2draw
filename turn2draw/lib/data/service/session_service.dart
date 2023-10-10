@@ -22,6 +22,11 @@ abstract class SessionService {
   /// If no session is found, it returns null
   Future<SessionInfo?> findSession(String sessionId);
 
+  /// Looks up a session by its join code
+  ///
+  /// returns session info if found & available, null otherwise
+  Future<SessionInfo?> findSessionByCode(String code);
+
   /// joins a session by id
   ///
   /// returns [true] if successful

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nanoid2/nanoid2.dart';
@@ -75,7 +76,7 @@ class _DrawableCanvasState extends State<DrawableCanvas> {
       },
       child: CustomPaint(
         painter: CanvasPainter(
-          drawables: widget.drawables,
+          drawables: widget.drawables + [if (_drawable != null) _drawable!],
         ),
         child: const SizedBox.expand(),
       ),

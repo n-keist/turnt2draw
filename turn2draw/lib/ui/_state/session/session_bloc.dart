@@ -132,7 +132,13 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         );
         break;
       case DrawableEventType.commit:
-        event.socket.emit(emitSessionCommitDrawing, mapDrawableToJson(event.drawable));
+        event.socket.emit(
+          emitSessionCommitDrawing,
+          {
+            'turnId': state.turnInfo.turnId,
+            'drawable': mapDrawableToJson(event.drawable),
+          },
+        );
         break;
       default:
         throw 'event type not implemented';

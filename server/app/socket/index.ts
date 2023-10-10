@@ -4,9 +4,8 @@ import { SessionService } from '../service/session.service';
 export default (server: SocketServer, socket: Socket, service: SessionService) => {
 
     socket.on('session.checkIn', async (data: Player) => {
-        socket.data.artRoom = data.player_session;
-        socket.data.artPlayerId = data.player_id;
-
+        socket.data.player = data;
+        await service.getSessionRepository().joinSession(data);
         await socket.join(data.player_session);
         const players = await service.getPlayers(data.player_session);
         server.to(data.player_session).emit('session.players', { players });
@@ -17,9 +16,8 @@ export default (server: SocketServer, socket: Socket, service: SessionService) =
     });
 
     socket.on('session.draw.commit', async (data: any) => {
-        const json = JSON.parse(data);
-
-        await service.putDrawing(json.turnId, json.drawable);
+        console.log(data);
+        await service.putDrawing(data.turnId, data.drawable);
     });
 
     socket.on('disconnect', async () => {

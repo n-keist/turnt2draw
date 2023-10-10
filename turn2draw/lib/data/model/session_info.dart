@@ -20,6 +20,7 @@ enum GameState {
 class SessionInfo {
   SessionInfo({
     this.id = '',
+    this.code = '',
     DateTime? start,
     this.state = GameState.waiting,
     this.word,
@@ -35,6 +36,7 @@ class SessionInfo {
     logger.d(json.toString());
     return SessionInfo(
       id: json['session_id'],
+      code: json['session_code'],
       start: DateTime.tryParse(json['session_start'] ?? ''),
       state: GameState.plain(json['session_state']),
       word: json['session_word'],
@@ -47,6 +49,7 @@ class SessionInfo {
   }
 
   final String id;
+  final String code;
   final DateTime start;
   final GameState state;
   final String? word;

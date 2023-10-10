@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:turn2draw/config/http.dart';
+import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
@@ -31,6 +32,7 @@ class _SessionScreenState extends State<SessionScreen> {
 
     socket.onAny((event, data) {
       if (!context.mounted) return;
+      logger.d([event, data]);
       context.read<SessionBloc>().add(
             SocketSessionEvent(
               socket: socket,

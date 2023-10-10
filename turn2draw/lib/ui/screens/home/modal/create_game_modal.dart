@@ -126,6 +126,7 @@ class _CreateGameModalState extends State<CreateGameModal> {
           Expanded(
             child: WideButton(
               color: Colors.pink,
+              foregroundColor: Colors.white,
               height: 60,
               label: config.word?.toUpperCase() ?? 'FREESTYLE',
               icon: config.word != null ? const Icon(Icons.refresh_rounded, color: Colors.white) : null,
@@ -150,6 +151,7 @@ class _CreateGameModalState extends State<CreateGameModal> {
       WideButton(
         label: 'START GAME',
         color: Colors.orange,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.rocket_launch_rounded, color: Colors.white),
         callback: () => Navigator.of(context).pop(config),
       ),

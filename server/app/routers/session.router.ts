@@ -12,7 +12,8 @@ export class SessionRouter {
         const controller: SessionController = new SessionController(service);
 
         this.router.get('/:id', controller.findSession);
-        this.router.post('/', controller.startSession);
+        this.router.get('/', controller.findById);
+        this.router.post('/', controller.createSession);
         this.router.get('/:id/begin', controller.beginSession);
         this.router.put('/random/join', controller.joinRandomSession);
         this.router.put('/:id/join', controller.joinSession);
