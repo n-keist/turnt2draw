@@ -43,7 +43,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     currentColor = colors[0];
-    context.read<HomeBloc>().add(HomeInitEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeBloc>().add(HomeInitEvent());
+
+      final why = GoRouterState.of(context).uri.queryParameters['why'];
+      switch (why) {
+        case 'KICKED':
+          showModalBottomSheet(
+            context: context,
+            builder: (_) => const MessageDialog(
+              title: 'hello ?',
+              body: 'You have been kicked.',
+            ),
+          );
+          break;
+        default:
+          break;
+      }
+    });
+
     super.initState();
   }
 
@@ -120,33 +138,46 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Expanded(
-              child: Stack(
-                children: [
-                  DrawableCanvas(
-                    drawables: drawables,
-                    enabled: true,
-                    color: currentColor,
-                    strokeWidth: 6.125,
-                    drawableCreated: (drawable) {
-                      setState(() => drawables.add(drawable));
-                    },
-                    drawableChanged: (drawable) {
-                      final drawableIndex = drawables.indexWhere((d) => d.id == drawable.id);
-                      if (drawableIndex <= -1) return;
-                      setState(() => drawables[drawableIndex] = drawable);
-                    },
-                    drawableCompleted: (_) {
-                      setState(() => currentColor = colors[Random().nextInt(colors.length - 1)]);
-                    },
-                  ),
-                  const Align(
-                    alignment: Alignment.topCenter,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 40.0),
-                      child: Brand(),
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Stack(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.grey.shade100,
+                      ),
+                      child: const SizedBox.expand(),
                     ),
-                  ),
-                ],
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: DrawableCanvas(
+                        drawables: drawables,
+                        enabled: true,
+                        color: currentColor,
+                        strokeWidth: 6.125,
+                        drawableCreated: (drawable) {
+                          setState(() => drawables.add(drawable));
+                        },
+                        drawableChanged: (drawable) {
+                          final drawableIndex = drawables.indexWhere((d) => d.id == drawable.id);
+                          if (drawableIndex <= -1) return;
+                          setState(() => drawables[drawableIndex] = drawable);
+                        },
+                        drawableCompleted: (_) {
+                          setState(() => currentColor = colors[Random().nextInt(colors.length - 1)]);
+                        },
+                      ),
+                    ),
+                    const Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 40.0),
+                        child: Brand(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             WideButton(

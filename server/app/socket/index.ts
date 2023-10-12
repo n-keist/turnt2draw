@@ -11,6 +11,12 @@ export default (server: SocketServer, socket: Socket, service: SessionService) =
         server.to(data.player_session).emit('session.players', { players });
     });
 
+    socket.on('session.player.kick', async (player: Player) => {
+        const sockets = await server.in(socket.data.artRoom).fetchSockets();
+        const filteredSockets = sockets.filter((socket) => socket.data.player.player_id == player.player_id);
+        filteredSockets.forEach((socket) => socket.emit('session.i.was.kicked'));
+    });
+
     socket.on('session.draw', (data: any) => {
         socket.to(data.sessionId).emit('session.draw', data.drawable);
     });

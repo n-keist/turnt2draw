@@ -5,6 +5,7 @@ import 'package:turn2draw/config/http.dart';
 import 'package:turn2draw/config/logger.dart';
 import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
+import 'package:turn2draw/ui/_state/session/effects/kicked_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/common/dialog/message_dialog.dart';
 import 'package:turn2draw/ui/screens/session/modal/confirm_exit.dart';
@@ -89,6 +90,9 @@ class _SessionScreenState extends State<SessionScreen> {
   void _sessionListener(BuildContext context, SessionState state) async {
     if (state.effect != null && state.effect is EndSessionEffect) {
       return context.go('/');
+    }
+    if (state.effect != null && state.effect is PlayerKickedEffect) {
+      return context.go('/?why=KICKED');
     }
     if (state.effect != null && state.effect is DialogEffect) {
       final effect = state.effect as DialogEffect;

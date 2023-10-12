@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:turn2draw/ui/common/input/wide_button.dart';
 
 class MessageDialog extends StatelessWidget {
@@ -42,6 +42,7 @@ class MessageDialog extends StatelessWidget {
           ),
         ),
         WideButton(
+          foregroundColor: Colors.white,
           label: callback != null ? callbackText : 'OKAY',
           callback: callback ?? () => Navigator.of(context).pop(),
         ),

@@ -3,11 +3,18 @@ import 'package:turn2draw/data/extension/widget_extension.dart';
 import 'package:turn2draw/data/model/player.dart';
 
 class SessionPlayerRow extends StatelessWidget {
-  const SessionPlayerRow(
-      {super.key, required this.player, this.isOwner = false, this.isSelf = false, this.showKickPlayer = false});
+  const SessionPlayerRow({
+    super.key,
+    required this.player,
+    this.isOwner = false,
+    this.isSelf = false,
+    this.showKickPlayer = false,
+    this.kickCallback,
+  });
 
   final bool isOwner, isSelf, showKickPlayer;
   final Player player;
+  final VoidCallback? kickCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +37,8 @@ class SessionPlayerRow extends StatelessWidget {
         ],
       ),
       trailing: IconButton(
-        onPressed: () => false,
-        icon: const Icon(Icons.handyman_rounded),
+        onPressed: kickCallback,
+        icon: const Icon(Icons.person_remove_rounded),
       ).showWhen(() => showKickPlayer && !isSelf),
     );
   }

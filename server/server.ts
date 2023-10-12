@@ -1,5 +1,6 @@
 import { createServer, Server as HttpServer } from 'http';
 import express, { Application } from 'express';
+import morgan from 'morgan';
 import { Server as SocketServer, Socket as IOSocket } from 'socket.io';
 import socketHandler from './app/socket'
 import { DrawAppRouter } from './app/routers';
@@ -34,11 +35,7 @@ export class DrawServer {
         // configure middleware
         app.use(express.json());
 
-        app.use((req, res, next) => {
-            console.log(req.body);
-
-            next();
-        });
+        app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
         // configure routers
         const drawappRouter = new DrawAppRouter(database, sessionService);

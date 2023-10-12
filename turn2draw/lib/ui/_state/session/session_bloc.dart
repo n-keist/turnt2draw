@@ -8,6 +8,7 @@ import 'package:turn2draw/data/model/turn_info.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
 import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
+import 'package:turn2draw/ui/_state/session/effects/kicked_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';
@@ -22,6 +23,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         playerService = playerService ?? LocalPlayerService(),
         super(SessionState()) {
     on<LocalSessionEvent>(_onLocalSessionEvent);
+    on<PlayerSocketEvent>(_onPlayerSocketEvent);
     on<SocketSessionEvent>(_onSessionSocketEvent);
     on<DrawableSessionEvent>(_onDrawableSessionEvent);
     on<InitSessionEvent>(_onInitSessionEvent);
@@ -53,8 +55,19 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     }
   }
 
+  void _onPlayerSocketEvent(PlayerSocketEvent event, Emitter<SessionState> emit) async {
+    switch (event.type) {
+      case PlayerSocketEventType.kick:
+        event.socket.emit(emitPlayerKick, event.player.toJson());
+        break;
+      default:
+        throw 'not implemented';
+    }
+  }
+
   void _onSessionSocketEvent(SocketSessionEvent event, Emitter<SessionState> emit) async {
     logger.d('SOCKET: "${event.event}" payload?: ${event.payload != null}');
+
     if (event.event == onConnect) {
       event.socket.emit(
         emitPlayerCheckIn,
@@ -104,6 +117,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
       );
       return;
     }
+
     if (event.event == onSessionState) {
       if (event.payload == null) throw 'unexpected null payload on ${event.event}';
       final sessionInfo = SessionInfo.parseJson(event.payload!['info']);
@@ -113,6 +127,15 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
         state.copyWith(
           info: () => sessionInfo,
           players: () => players,
+        ),
+      );
+      return;
+    }
+
+    if (event.event == onSelfKicked) {
+      emit(
+        state.copyWith(
+          effect: () => PlayerKickedEffect(),
         ),
       );
       return;

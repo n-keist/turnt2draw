@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
+import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';
 import 'package:turn2draw/ui/_state/session/session_bloc.dart';
@@ -32,7 +35,8 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
   List<PaintDrawable> localDrawables = <PaintDrawable>[];
 
   int turnDuration = 0;
-  double indicatorValue = 0.0;
+
+  String turnTime = '00:00';
 
   Timer? timer;
 
@@ -48,32 +52,67 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: Text(context.read<SessionBloc>().state.info.word ?? 'freestyle'),
-        actions: [
-          IconButton(
-            onPressed: () => false,
-            icon: const Icon(Icons.logout_rounded),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
           ),
-          IconButton(
-            onPressed: () => false,
-            icon: const Icon(Icons.skip_next_rounded),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(
-            value: indicatorValue,
-            borderRadius: BorderRadius.circular(4.0),
-            backgroundColor: Colors.transparent,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  BlocSelector<SessionBloc, SessionState, Player?>(
+                    selector: (state) => state.players.firstWhereOrNull((p) => p.playerId == state.turnInfo.turnPlayer),
+                    builder: (context, state) {
+                      if (state == null) return const SizedBox.shrink();
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            child: Text(
+                              state.playerIcon,
+                              style: const TextStyle(
+                                fontSize: 22.0,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6.0),
+                          Text(
+                            state.playerDisplayname,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.schedule_rounded),
+                      const SizedBox(width: 6.0),
+                      Flexible(
+                        child: Text(
+                          turnTime,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
       body: BlocListener<SessionBloc, SessionState>(
         listener: _sessionListener,
-        child: AspectRatio(
-          aspectRatio: 9 / 12,
+        child: FittedBox(
+          clipBehavior: Clip.hardEdge,
           child: DrawableCanvas(
             drawables: localDrawables,
             color: colorNotifier.value,
@@ -132,28 +171,36 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
   void _sessionListener(BuildContext context, SessionState state) {
     if (state.effect != null && (state.effect is MyTurnEffect || state.effect is NotMyTurnEffect)) {
       turnDuration = state.info.turnDuration;
-      indicatorValue = 1.0;
       timer?.cancel();
       timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (turnDuration == 0) timer.cancel();
-        turnDuration -= 1;
-        setState(() => indicatorValue = turnDuration / state.info.turnDuration);
+        final duration = Duration(seconds: turnDuration);
+        setState(() {
+          turnDuration -= 1;
+          if (duration.inMinutes == 0) {
+            turnTime = duration.inSeconds.toString().padLeft(2, '0');
+            return;
+          }
+          turnTime =
+              '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.toString().padLeft(2, '0')}';
+        });
       });
     }
     if (state.effect != null && state.effect is MyTurnEffect) {
       setState(() => myTurn = true);
+      HapticFeedback.mediumImpact();
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-          SnackBar(
+          const SnackBar(
             behavior: SnackBarBehavior.floating,
             showCloseIcon: true,
             closeIconColor: Colors.white,
             content: Row(
               children: [
-                const Icon(Icons.brush_rounded, color: Colors.white),
-                const SizedBox(width: 6.0),
-                Text('${state.info.turnDuration} seconds, draw!')
+                Icon(Icons.brush_rounded, color: Colors.white),
+                SizedBox(width: 6.0),
+                Text('It\'s your turn!')
               ],
             ),
           ),

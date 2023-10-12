@@ -8,7 +8,6 @@ final lightTheme = ThemeData(
     foregroundColor: Colors.grey.shade800,
     systemOverlayStyle: SystemUiOverlayStyle.dark,
     titleTextStyle: TextStyle(
-      fontFamily: 'ComingSoon',
       color: Colors.grey.shade800,
       fontWeight: FontWeight.bold,
       fontSize: 20.0,
