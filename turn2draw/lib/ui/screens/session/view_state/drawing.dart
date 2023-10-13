@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 import 'package:turn2draw/data/model/player.dart';
+import 'package:turn2draw/data/model/session_info.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';
 import 'package:turn2draw/ui/_state/session/session_bloc.dart';
@@ -34,7 +35,7 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
   bool myTurn = false;
   List<PaintDrawable> localDrawables = <PaintDrawable>[];
 
-  int turnDuration = 0;
+  int secondsPassed = 0;
 
   String turnTime = '00:00';
 
@@ -80,11 +81,28 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
                             ),
                           ),
                           const SizedBox(width: 6.0),
-                          Text(
-                            state.playerDisplayname,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.playerDisplayname,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              BlocSelector<SessionBloc, SessionState, SessionInfo>(
+                                selector: (state) => state.info,
+                                builder: (context, info) {
+                                  return Text(
+                                    info.word ?? 'no topic!',
+                                    style: const TextStyle(
+                                      fontSize: 12.0,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       );
@@ -111,29 +129,35 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
       ),
       body: BlocListener<SessionBloc, SessionState>(
         listener: _sessionListener,
-        child: FittedBox(
-          clipBehavior: Clip.hardEdge,
-          child: DrawableCanvas(
-            drawables: localDrawables,
-            color: colorNotifier.value,
-            enabled: myTurn,
-            strokeWidth: strokeWidthNotifier.value,
-            drawableCreated: (drawable) {
-              setState(() => localDrawables.add(drawable));
-              context.read<SessionBloc>().add(
-                  DrawableSessionEvent(socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
-            },
-            drawableChanged: (drawable) {
-              setState(() {
-                final index = localDrawables.indexWhere((element) => element.id == drawable.id);
-                if (index <= -1) return;
-                localDrawables[index] = drawable;
-                context.read<SessionBloc>().add(DrawableSessionEvent(
-                    socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
-              });
-            },
-            drawableCompleted: (drawable) => context.read<SessionBloc>().add(
-                DrawableSessionEvent(socket: widget.socket, drawable: drawable, eventType: DrawableEventType.commit)),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: ColoredBox(
+              color: Colors.grey.shade100,
+              child: DrawableCanvas(
+                drawables: localDrawables,
+                color: colorNotifier.value,
+                enabled: myTurn,
+                strokeWidth: strokeWidthNotifier.value,
+                drawableCreated: (drawable) {
+                  setState(() => localDrawables.add(drawable));
+                  context.read<SessionBloc>().add(DrawableSessionEvent(
+                      socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
+                },
+                drawableChanged: (drawable) {
+                  setState(() {
+                    final index = localDrawables.indexWhere((element) => element.id == drawable.id);
+                    if (index <= -1) return;
+                    localDrawables[index] = drawable;
+                    context.read<SessionBloc>().add(DrawableSessionEvent(
+                        socket: widget.socket, drawable: drawable, eventType: DrawableEventType.create));
+                  });
+                },
+                drawableCompleted: (drawable) => context.read<SessionBloc>().add(DrawableSessionEvent(
+                    socket: widget.socket, drawable: drawable, eventType: DrawableEventType.commit)),
+              ),
+            ),
           ),
         ),
       ),
@@ -170,21 +194,9 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
 
   void _sessionListener(BuildContext context, SessionState state) {
     if (state.effect != null && (state.effect is MyTurnEffect || state.effect is NotMyTurnEffect)) {
-      turnDuration = state.info.turnDuration;
-      timer?.cancel();
-      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (turnDuration == 0) timer.cancel();
-        final duration = Duration(seconds: turnDuration);
-        setState(() {
-          turnDuration -= 1;
-          if (duration.inMinutes == 0) {
-            turnTime = duration.inSeconds.toString().padLeft(2, '0');
-            return;
-          }
-          turnTime =
-              '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.toString().padLeft(2, '0')}';
-        });
-      });
+      _startTimer(
+        Duration(seconds: state.info.turnDuration),
+      );
     }
     if (state.effect != null && state.effect is MyTurnEffect) {
       setState(() => myTurn = true);
@@ -200,7 +212,9 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
               children: [
                 Icon(Icons.brush_rounded, color: Colors.white),
                 SizedBox(width: 6.0),
-                Text('It\'s your turn!')
+                Text(
+                  'You\'re up!',
+                )
               ],
             ),
           ),
@@ -236,5 +250,26 @@ class _SessionDrawingViewState extends State<SessionDrawingView> {
       context: context,
       builder: (context) => SessionStrokeWidthModal(strokeWidthNotifier: strokeWidthNotifier),
     );
+  }
+
+  void _startTimer(Duration duration) {
+    timer?.cancel();
+    timer = Timer.periodic(Durations.extralong4, (timer) {
+      if (secondsPassed >= duration.inSeconds) {
+        this.timer?.cancel();
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        secondsPassed += 1;
+        final remainingDuration = Duration(seconds: duration.inSeconds - secondsPassed);
+        if (remainingDuration.inMinutes > 0) {
+          turnTime =
+              '${remainingDuration.inMinutes.toString().padLeft(2, '0')}:${remainingDuration.inSeconds.toString().padLeft(2, '0')}';
+          return;
+        }
+        turnTime = remainingDuration.inSeconds.toString().padLeft(2, '0');
+      });
+    });
   }
 }

@@ -78,6 +78,8 @@ class _DrawableCanvasState extends State<DrawableCanvas> {
         painter: CanvasPainter(
           drawables: widget.drawables + [if (_drawable != null) _drawable!],
         ),
+        isComplex: true,
+        willChange: true,
         child: const SizedBox.expand(),
       ),
     );

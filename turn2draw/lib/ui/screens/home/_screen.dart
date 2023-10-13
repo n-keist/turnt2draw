@@ -86,7 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(width: 12.0),
-                Text(player.playerDisplayname),
+                Flexible(
+                  child: Text(player.playerDisplayname),
+                ),
               ],
             );
           },

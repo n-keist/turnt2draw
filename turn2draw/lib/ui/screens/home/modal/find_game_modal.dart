@@ -16,46 +16,47 @@ class FindGameModal extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(
+          Padding(
+            padding: const EdgeInsets.symmetric(
               vertical: 24.0,
               horizontal: 12.0,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'GAME CODE',
                   style: TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
+                const Text(
                   '(typically A-F & 0-9), visible during the waiting period',
                   style: TextStyle(
                     color: Colors.grey,
                   ),
                 ),
-              ],
-            ),
-          ),
-          TextField(
-            controller: controller,
-            maxLength: 5,
-            autofocus: true,
-            textAlign: TextAlign.center,
-            textCapitalization: TextCapitalization.characters,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.transparent,
-                  style: BorderStyle.none,
+                const SizedBox(height: 12.0),
+                TextField(
+                  controller: controller,
+                  maxLength: 5,
+                  autofocus: true,
+                  textAlign: TextAlign.center,
+                  textCapitalization: TextCapitalization.characters,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.transparent,
+                        style: BorderStyle.none,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           ListenableBuilder(
