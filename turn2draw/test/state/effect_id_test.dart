@@ -6,6 +6,7 @@ class TestEffect extends Effect {}
 void main() {
   test('effect has id', () {
     final effect = TestEffect();
-    expect(effect.effectId, isNotNaN);
+    expect(effect.effectId, isA<String>());
+    expect(effect.effectId, isNotEmpty);
   });
 }

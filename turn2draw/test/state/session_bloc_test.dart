@@ -5,8 +5,8 @@ import 'package:turn2draw/config/socket.dart';
 import 'package:turn2draw/data/model/paint_drawable.dart';
 import 'package:turn2draw/data/model/player.dart';
 import 'package:turn2draw/data/model/session_info.dart';
+import 'package:turn2draw/ui/_state/common_effects/dialog_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/drawable_effect.dart';
-import 'package:turn2draw/ui/_state/session/effects/player_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/session_effect.dart';
 import 'package:turn2draw/ui/_state/session/effects/turn_effect.dart';
 import 'package:turn2draw/ui/_state/session/events/init_event.dart';
@@ -24,38 +24,23 @@ void main() {
 
   group('InitSessionEvent', () {
     blocTest(
-      'player info is null',
-      build: () => SessionBloc(
-        playerService: playerService,
-      ),
-      setUp: () {
-        when(() => playerService.getCurrentPlayerId()).thenAnswer((_) async => null);
-        when(() => playerService.getCurrentPlayerName()).thenAnswer((_) async => null);
-      },
-      act: (b) => b.add(InitSessionEvent()),
-      expect: () => [
-        const TypeMatcher<SessionState>().having(
-          (state) => state.effect,
-          'is effect',
-          isA<NoPlayerInfoEffect>(),
-        ),
-      ],
-    );
-
-    blocTest(
       'player info is set',
       build: () => SessionBloc(
         playerService: playerService,
       ),
       setUp: () {
-        when(() => playerService.getCurrentPlayerId()).thenAnswer((_) async => 'some-id');
-        when(() => playerService.getCurrentPlayerName()).thenAnswer((_) async => 'some-name');
+        when(() => playerService.getCurrentPlayer()).thenAnswer(
+          (_) async => const Player(
+            playerId: 'some-id',
+            playerDisplayname: 'cool_name',
+          ),
+        );
       },
       act: (b) => b.add(InitSessionEvent()),
       expect: () => [
         const TypeMatcher<SessionState>()
             .having((state) => state.self.playerId, 'is player id', 'some-id')
-            .having((state) => state.self.playerDisplayname, 'is player name', 'some-name'),
+            .having((state) => state.self.playerDisplayname, 'is player name', 'cool_name'),
       ],
     );
   });
@@ -115,8 +100,8 @@ void main() {
       expect: () => [
         const TypeMatcher<SessionState>().having(
           (s) => s.effect,
-          'is not enough players effect',
-          isA<NotEnoughPlayersSessionEffect>(),
+          'sets dialog effect',
+          isA<DialogEffect>(),
         ),
       ],
     );
@@ -183,6 +168,7 @@ void main() {
               'player_id': 'some-player-id',
               'player_session': 'some-session-id',
               'player_displayname': 'some-displayname',
+              'player_icon': '😀',
             }
           ]
         }),
@@ -210,6 +196,7 @@ void main() {
           event: onSessionStateUpdate,
           payload: {
             'session_id': 'some-id',
+            'session_code': 'ABCDEF',
             'session_start': DateTime.now().toIso8601String(),
             'session_state': 'waiting',
             'session_word': null,

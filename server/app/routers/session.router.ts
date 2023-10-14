@@ -9,7 +9,7 @@ export class SessionRouter {
     constructor(private service: SessionService) {
         this.router = express.Router();
 
-        const controller: SessionController = new SessionController(service);
+        const controller: SessionController = new SessionController(this.service);
 
         this.router.get('/:id', controller.findSession);
         this.router.get('/', controller.findById);

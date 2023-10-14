@@ -72,7 +72,7 @@ void main() {
           '["some", "word", "list"]',
           200,
           headers: {
-            'E-Tag': 'some-e-tag',
+            'etag': 'some-e-tag',
           },
         ),
       );
