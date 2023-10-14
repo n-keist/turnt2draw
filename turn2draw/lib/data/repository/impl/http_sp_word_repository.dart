@@ -22,13 +22,14 @@ class HttpSharedPreferencesWordRepository implements WordRepository {
 
       final response = await client.get(
         Uri.parse(httpBaseUrl).replace(
-          path: '/api/words/word',
+          path: '/api/words/',
           queryParameters: {
             'type': type.getHttpKey(),
           },
         ),
         headers: {
           if (eTag != null) 'If-None-Match': eTag,
+          'x-draw-token': httpToken,
         },
       );
 

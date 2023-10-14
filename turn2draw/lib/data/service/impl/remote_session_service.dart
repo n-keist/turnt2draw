@@ -12,6 +12,9 @@ class RemoteSessionService extends SessionService {
         Uri.parse(httpBaseUrl).replace(
           path: '/api/session/$sessionId',
         ),
+        headers: {
+          'x-draw-token': httpToken,
+        },
       );
       return SessionInfo.parseJson(jsonDecode(response.body));
     } catch (e) {
@@ -30,6 +33,9 @@ class RemoteSessionService extends SessionService {
             'code': code,
           },
         ),
+        headers: {
+          'x-draw-token': httpToken,
+        },
       );
       return SessionInfo.parseJson(jsonDecode(response.body));
     } catch (e) {
@@ -47,6 +53,7 @@ class RemoteSessionService extends SessionService {
         ),
         headers: {
           'Content-Type': 'application/json',
+          'x-draw-token': httpToken,
         },
         body: jsonEncode(player.toJson()),
       );
@@ -67,6 +74,7 @@ class RemoteSessionService extends SessionService {
         body: jsonEncode(config.toJson()),
         headers: {
           'Content-Type': 'application/json',
+          'x-draw-token': httpToken,
         },
       );
       if (response.statusCode != 201) return null;
@@ -85,6 +93,9 @@ class RemoteSessionService extends SessionService {
         Uri.parse(httpBaseUrl).replace(
           path: '/api/session/$sessionId/begin',
         ),
+        headers: {
+          'x-draw-token': httpToken,
+        },
       );
       if (response.statusCode == 200) return null;
       final json = jsonDecode(response.body);
@@ -105,6 +116,7 @@ class RemoteSessionService extends SessionService {
         body: jsonEncode(player.toJson()),
         headers: {
           'Content-Type': 'application/json',
+          'x-draw-token': httpToken,
         },
       );
       if (response.statusCode != 200) return null;

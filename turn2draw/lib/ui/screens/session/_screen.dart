@@ -28,7 +28,7 @@ class _SessionScreenState extends State<SessionScreen> {
   void initState() {
     socket = socket_io.io(
       httpBaseUrl,
-      socket_io.OptionBuilder().setTransports(['websocket']).disableAutoConnect().build(),
+      socket_io.OptionBuilder().setTransports(['websocket']).disableAutoConnect().setAuth({'token': httpToken}).build(),
     )..connect();
 
     socket.onAny((event, data) {
