@@ -1,17 +1,15 @@
 import express, { Router } from 'express';
 import { WordController } from '../controllers/word.controller';
-import { DrawDatabase } from '../../database';
-import { WordRepository } from '../repository/word.repository';
+import { WordService } from '../service/word.service';
 
 export class WordRouter {
     router: Router;
 
-    constructor(private database: DrawDatabase) {
+    constructor(private service: WordService) {
         this.router = express.Router();
-        const wordRepository = new WordRepository(database);
-        const wordController = new WordController(wordRepository);
+        const wordController = new WordController(this.service);
 
-        this.router.get('/word', wordController.getWords);
+        this.router.get('/', wordController.getWords);
     }
 
 };

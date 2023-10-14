@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
-import { WordRepository } from '../repository/word.repository';
+import { WordService } from '../service/word.service';
 
 export class WordController {
-    constructor(private repository: WordRepository) { }
+    constructor(private service: WordService) { }
 
     getWords = async (request: Request, response: Response) => {
-        const words: string[] = await this.repository.getWords(request.query.type?.toString() ?? 'topic');
+        const { type } = request.query;
+        const words: string[] = await this.service.getWordRepository().getWords(type?.toString() ?? 'topic');
         return response.status(200).json(words);
     };
 };
