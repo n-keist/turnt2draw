@@ -2,7 +2,7 @@ name: Flutter Test
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
 
 jobs:
   test:
@@ -10,7 +10,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-        with:
-          channel: "beta"
-          working-directory: "./turn2draw"
-      - run: flutter test
+      - run: "flutter test"
+        working-directory: "./turn2draw"
