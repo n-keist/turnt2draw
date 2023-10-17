@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +26,7 @@ Future<void> setupLocator() async {
     await preferences.clear();
   }
 
-  if (kReleaseMode) {
+  if (kReleaseMode && !Platform.environment.containsKey('FLUTTER_TEST')) {
     locator.registerSingleton<FirebaseService>(FirebaseServiceImpl());
   }
 
