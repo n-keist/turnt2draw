@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 server_socket_client/
+canvas_runner/
 turn2draw/android/app/google-services.json
 turn2draw/lib/firebase_options.dart
 turn2draw/ios/Runner/GoogleService-Info.plist

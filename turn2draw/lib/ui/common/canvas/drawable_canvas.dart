@@ -40,6 +40,8 @@ class _DrawableCanvasState extends State<DrawableCanvas> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.enabled) return _canvas;
+
     return GestureDetector(
       onPanStart: (details) {
         if (!widget.enabled) return;
@@ -74,14 +76,18 @@ class _DrawableCanvasState extends State<DrawableCanvas> {
         widget.drawableCompleted?.call(_drawable!);
         setState(() => _drawable = null);
       },
-      child: CustomPaint(
-        painter: CanvasPainter(
-          drawables: widget.drawables + [if (_drawable != null) _drawable!],
-        ),
-        isComplex: true,
-        willChange: true,
-        child: const SizedBox.expand(),
-      ),
+      child: _canvas,
     );
   }
+
+  Widget get _canvas => RepaintBoundary(
+        child: CustomPaint(
+          painter: CanvasPainter(
+            drawables: widget.drawables + [if (_drawable != null) _drawable!],
+          ),
+          isComplex: true,
+          willChange: true,
+          child: const SizedBox.expand(),
+        ),
+      );
 }
