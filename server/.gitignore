@@ -16,6 +16,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Runtime data
 
+.setup
 pids
 _.pid
 _.seed
@@ -167,3 +168,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.\*
+
+
+.DS_Store

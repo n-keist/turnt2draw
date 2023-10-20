@@ -1,12 +1,15 @@
 import { Request, Response } from 'express';
 import { SessionService } from '../service/session.service';
 import userValidator from '../validators/user.validator';
+import sessionValidator from '../validators/session.validator';
 
 export class SessionController {
 
     constructor(private service: SessionService) { }
 
     findSession = async (request: Request, response: Response) => {
+        if (!request.params.id) return response.status(400).end();
+
         const session: DBSession | undefined = await this.service.getSessionRepository().findSession(request.params.id);
         if (!session) return response.status(404).end();
         return response.status(200).json(session);
@@ -21,6 +24,9 @@ export class SessionController {
     };
 
     createSession = async (request: Request, response: Response) => {
+        if (!sessionValidator(request.body).validate()) {
+            return response.status(400).end();
+        }
         const config: CreateSessionConfig = request.body;
         const sessionId: string | undefined = await this.service.getSessionRepository().createSession(config);
         if (!sessionId) return response.status(500).end();
@@ -48,6 +54,8 @@ export class SessionController {
     };
 
     beginSession = async (request: Request, response: Response) => {
+        if (!request.params.id) return response.status(400).end();
+
         const sessionId: string = request.params.id;
         if (!sessionId) return response.status(400).json({
             err_code: 'NO_ID'

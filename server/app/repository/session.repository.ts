@@ -1,6 +1,7 @@
 import { DrawDatabase } from '../../database';
 import { nanoid } from 'nanoid';
 import code_gen from '../util/code_gen';
+import { SqlError } from 'mariadb';
 
 export class SessionRepository {
     constructor(private database: DrawDatabase) { }
@@ -44,7 +45,13 @@ export class SessionRepository {
             );
             return rows[0]['session_id'];
         } catch (error) {
-            console.error(error);
+            if (error instanceof SqlError) {
+                if (error.code == 'ER_DUP_ENTRY') {
+                    console.warn('tried creating a duplicate session');
+                    return;
+                }
+                console.error(error);
+            }
             return undefined;
         }
     };
