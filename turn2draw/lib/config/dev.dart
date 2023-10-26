@@ -1,1 +1,1 @@
-const devSessionId = 'debug-session';
+const devSessionId = 'debug-session-----------';

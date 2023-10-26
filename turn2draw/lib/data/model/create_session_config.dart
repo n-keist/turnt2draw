@@ -42,7 +42,7 @@ class CreateSessionConfig extends Equatable {
 
   Map<String, dynamic> toJson() => {
         if (kDebugMode) 'id': devSessionId,
-        'word': word,
+        if (word != null) 'word': word,
         'maxPlayers': maxPlayers,
         'roundCount': roundCount,
         'turnDuration': turnDuration,
