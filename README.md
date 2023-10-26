@@ -5,6 +5,9 @@ A turn based mobile drawing game, written in Flutter.
 Backend is written in TypeScript and run by Bun!
 
 
+### Video Demo:
+[![Video Demo](http://img.youtube.com/vi/MJphHHy8tWo/0.jpg)](https://www.youtube.com/watch?v=MJphHHy8tWo "Video Title")
+
 ## Run Locally
 
 Clone the project
