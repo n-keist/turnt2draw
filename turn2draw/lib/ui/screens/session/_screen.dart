@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:math' show pi;
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -24,8 +28,13 @@ class SessionScreen extends StatefulWidget {
 
 class _SessionScreenState extends State<SessionScreen> {
   late socket_io.Socket socket;
+
+  late ConfettiController confettiController;
+
   @override
   void initState() {
+    confettiController = ConfettiController(duration: const Duration(seconds: 6));
+
     socket = socket_io.io(
       httpBaseUrl,
       socket_io.OptionBuilder().setTransports(['websocket']).disableAutoConnect().setAuth({'token': httpToken}).build(),
@@ -70,18 +79,35 @@ class _SessionScreenState extends State<SessionScreen> {
       child: BlocListener<SessionBloc, SessionState>(
         listenWhen: (_, __) => true,
         listener: _sessionListener,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: BlocSelector<SessionBloc, SessionState, SessionInfo>(
-            selector: (state) => state.info,
-            builder: (context, sessionInfo) {
-              return switch (sessionInfo.state) {
-                GameState.waiting => SessionWaitingView(socket: socket),
-                GameState.playing => SessionDrawingView(socket: socket),
-                _ => throw 'you should not be here!',
-              };
-            },
-          ),
+        child: Stack(
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: BlocSelector<SessionBloc, SessionState, SessionInfo>(
+                selector: (state) => state.info,
+                builder: (context, sessionInfo) {
+                  return switch (sessionInfo.state) {
+                    GameState.waiting => SessionWaitingView(socket: socket),
+                    GameState.playing => SessionDrawingView(socket: socket),
+                    _ => throw 'you should not be here!',
+                  };
+                },
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: confettiController,
+                colors: const [Colors.orangeAccent, Colors.purple, Colors.blueAccent],
+                blastDirection: pi / 2,
+                maxBlastForce: 6.5, // set a lower max blast force
+                minBlastForce: 2.5, // set a lower min blast force
+                emissionFrequency: 0.08,
+                numberOfParticles: 12, // a lot of particles at once
+                gravity: .125,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -89,7 +115,23 @@ class _SessionScreenState extends State<SessionScreen> {
 
   void _sessionListener(BuildContext context, SessionState state) async {
     if (state.effect != null && state.effect is EndSessionEffect) {
-      return context.go('/');
+      setState(() => confettiController.play());
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 8),
+            content: Text(
+              'Save Result to ${Platform.isIOS ? 'Camera Roll' : 'Gallery'}?',
+            ),
+            action: SnackBarAction(
+              label: 'Save',
+              onPressed: () => context.read<SessionBloc>().add(SessionSaveResultEvent()),
+            ),
+          ),
+        );
+      return;
     }
     if (state.effect != null && state.effect is PlayerKickedEffect) {
       return context.go('/?why=KICKED');

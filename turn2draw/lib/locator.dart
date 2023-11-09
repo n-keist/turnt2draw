@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +5,6 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turn2draw/config/bloc_config.dart';
 import 'package:turn2draw/data/repository/word_repository.dart';
-import 'package:turn2draw/data/service/firebase_service.dart';
-import 'package:turn2draw/data/service/impl/firebase_service_impl.dart';
 import 'package:turn2draw/data/service/player_service.dart';
 import 'package:turn2draw/data/service/session_service.dart';
 import 'package:turn2draw/data/service/settings_service.dart';
@@ -24,10 +20,6 @@ Future<void> setupLocator() async {
 
   if (kDebugMode) {
     await preferences.clear();
-  }
-
-  if (kReleaseMode && !Platform.environment.containsKey('FLUTTER_TEST')) {
-    locator.registerSingleton<FirebaseService>(FirebaseServiceImpl());
   }
 
   locator.registerSingleton<PlayerService>(

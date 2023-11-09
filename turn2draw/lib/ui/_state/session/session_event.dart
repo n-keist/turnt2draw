@@ -8,4 +8,6 @@ part 'events/socket_event.dart';
 part 'events/local_event.dart';
 part 'events/player_socket_event.dart';
 
+part 'events/save_result_event.dart';
+
 abstract class SessionEvent {}

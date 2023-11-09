@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' show Random;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     currentColor = colors[0];
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HomeBloc>().add(HomeInitEvent());
 

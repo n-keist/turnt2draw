@@ -27,6 +27,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     on<SocketSessionEvent>(_onSessionSocketEvent);
     on<DrawableSessionEvent>(_onDrawableSessionEvent);
     on<InitSessionEvent>(_onInitSessionEvent);
+    on<SessionSaveResultEvent>(_onSessionSaveResultEvent);
   }
 
   final SessionService sessionService;
@@ -166,6 +167,15 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
       default:
         throw 'event type not implemented';
     }
+  }
+
+  void _onSessionSaveResultEvent(SessionSaveResultEvent event, Emitter<SessionState> emit) async {
+    // TODO: implement saving logic
+    emit(
+      state.copyWith(
+        effect: () => null,
+      ),
+    );
   }
 
   Future<SessionState> _joinSession(String sessionId) async {
